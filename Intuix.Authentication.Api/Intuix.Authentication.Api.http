@@ -1,0 +1,6 @@
+@Intuix.Authentication.Api_HostAddress = http://localhost:5028
+
+GET {{Intuix.Authentication.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
