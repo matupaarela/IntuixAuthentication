@@ -21,10 +21,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(150);
 
         builder.Property(x => x.PasswordHash)
+            .HasMaxLength(500)
             .IsRequired();
 
         builder.HasIndex(x => new { x.TenantId, x.Username })
             .IsUnique();
+
+        builder.HasOne<Tenant>()
+            .WithMany()
+            .HasForeignKey(x => x.TenantId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(x => x.RefreshTokens)
             .WithOne(x => x.User)

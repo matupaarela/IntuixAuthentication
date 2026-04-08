@@ -67,12 +67,14 @@ app.UseMiddleware<TenantMiddleware>();
 
 app.MapControllers();
 
+
+
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+//    await db.Database.MigrateAsync();
+//    await AuthDbSeeder.SeedAsync(db);
+//}
+
 app.Run();
-
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    await db.Database.MigrateAsync();
-    await AuthDbSeeder.SeedAsync(db);
-}

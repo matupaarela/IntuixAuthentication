@@ -112,12 +112,13 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false),
                     FailedAttempts = table.Column<int>(type: "int", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TenantId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -125,6 +126,12 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_auth_users_auth_tenants_TenantId",
                         column: x => x.TenantId,
+                        principalTable: "auth_tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_auth_users_auth_tenants_TenantId1",
+                        column: x => x.TenantId1,
                         principalTable: "auth_tenants",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -158,6 +165,7 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TokenHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RevokedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -173,7 +181,7 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                         column: x => x.UserId,
                         principalTable: "auth_users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -216,13 +224,13 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                         column: x => x.CompanyId,
                         principalTable: "auth_companies",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_auth_user_companies_auth_users_UserId",
                         column: x => x.UserId,
                         principalTable: "auth_users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -283,6 +291,11 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                 table: "auth_users",
                 columns: new[] { "TenantId", "Username" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_auth_users_TenantId1",
+                table: "auth_users",
+                column: "TenantId1");
         }
 
         /// <inheritdoc />

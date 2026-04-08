@@ -124,6 +124,10 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("TokenHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
@@ -234,11 +238,15 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte[]>("PasswordHash")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Username")
@@ -247,6 +255,8 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId1");
 
                     b.HasIndex("TenantId", "Username")
                         .IsUnique();
@@ -320,7 +330,7 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     b.HasOne("Intuix.Authentication.Domain.Entities.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -347,9 +357,15 @@ namespace Intuix.Authentication.Infrastructure.Migrations
 
             modelBuilder.Entity("Intuix.Authentication.Domain.Entities.User", b =>
                 {
-                    b.HasOne("Intuix.Authentication.Domain.Entities.Tenant", "Tenant")
+                    b.HasOne("Intuix.Authentication.Domain.Entities.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Intuix.Authentication.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -361,13 +377,13 @@ namespace Intuix.Authentication.Infrastructure.Migrations
                     b.HasOne("Intuix.Authentication.Domain.Entities.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Intuix.Authentication.Domain.Entities.User", "User")
                         .WithMany("UserCompanies")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Company");

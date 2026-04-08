@@ -11,8 +11,9 @@ dotnet ef migrations add InitialAuth --project ./Intuix.Authentication.Infrastru
 dotnet ef database update --project ./Intuix.Authentication.Infrastructure --startup-project ./Intuix.Authentication.Api
 
 */
+--SELECT COUNT(*) FROM auth_users
 
-
+/*
 CREATE TABLE auth_tenants (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     name NVARCHAR(150) NOT NULL,
@@ -120,5 +121,112 @@ CREATE TABLE auth_refresh_tokens (
 
     FOREIGN KEY (user_id) REFERENCES auth_users(id)
 );
+*/
+
+-- SEEDS
+
+
+-- =========================================
+-- TENANTS
+-- =========================================
+INSERT INTO auth_tenants (id, code, name)
+VALUES 
+(NEWID(), 'TNT-INTUIX', 'Intuix Holding'),
+(NEWID(), 'TNT-QUIPU', 'Quipu Group');
+
+DECLARE @TenantIntuix UNIQUEIDENTIFIER = (SELECT id FROM auth_tenants WHERE code = 'TNT-INTUIX');
+DECLARE @TenantQuipu  UNIQUEIDENTIFIER = (SELECT id FROM auth_tenants WHERE code = 'TNT-QUIPU');
+
+-- =========================================
+-- ORGANIZATIONS
+-- =========================================
+INSERT INTO auth_organizations (id, tenant_id, name)
+VALUES
+(NEWID(), @TenantIntuix, 'Intuix Corp'),
+(NEWID(), @TenantQuipu, 'Quipu Facturación');
+
+DECLARE @OrgIntuix UNIQUEIDENTIFIER = (SELECT id FROM auth_organizations WHERE name = 'Intuix Corp');
+DECLARE @OrgQuipu  UNIQUEIDENTIFIER = (SELECT id FROM auth_organizations WHERE name = 'Quipu Facturación');
+
+-- =========================================
+-- COMPANIES
+-- =========================================
+INSERT INTO auth_companies (id, organization_id, name, ruc)
+VALUES
+(NEWID(), @OrgIntuix, 'Intuix Software SAC', '20600011111'),
+(NEWID(), @OrgQuipu,  'Comercial Quipu SAC', '20600022222'),
+(NEWID(), @OrgQuipu,  'Servicios Quipu EIRL', '20600033333');
+
+DECLARE @CompQuipu1 UNIQUEIDENTIFIER = (SELECT id FROM auth_companies WHERE name = 'Comercial Quipu SAC');
+
+-- =========================================
+-- ROLES
+-- =========================================
+INSERT INTO auth_roles (id, tenant_id, name)
+VALUES
+(NEWID(), @TenantIntuix, 'Administrador'),
+(NEWID(), @TenantIntuix, 'Desarrollador'),
+(NEWID(), @TenantQuipu,  'Administrador'),
+(NEWID(), @TenantQuipu,  'Vendedor'),
+(NEWID(), @TenantQuipu,  'Cajero');
+
+-- =========================================
+-- PERMISSIONS
+-- =========================================
+INSERT INTO auth_permissions (id, code, description)
+VALUES
+(NEWID(), 'USER_CREATE', 'Crear usuarios'),
+(NEWID(), 'USER_VIEW', 'Ver usuarios'),
+(NEWID(), 'SALES_CREATE', 'Registrar ventas'),
+(NEWID(), 'PAYMENT_CREATE', 'Registrar pagos'),
+(NEWID(), 'REPORT_VIEW', 'Ver reportes');
+
+-- =========================================
+-- ROLE - PERMISSIONS (ADMIN = TODO)
+-- =========================================
+INSERT INTO auth_role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM auth_roles r
+CROSS JOIN auth_permissions p
+WHERE r.name = 'Administrador';
+
+-- =========================================
+-- USERS
+-- =========================================
+INSERT INTO auth_users (id, tenant_id, username, email, password_hash)
+VALUES
+(NEWID(), @TenantIntuix, 'admin', 'admin@intuix.com', 0x01),
+(NEWID(), @TenantIntuix, 'dev1', 'dev1@intuix.com', 0x01),
+(NEWID(), @TenantQuipu,  'admin', 'admin@quipu.com', 0x01),
+(NEWID(), @TenantQuipu,  'vendedor', 'ventas@quipu.com', 0x01),
+(NEWID(), @TenantQuipu,  'cajero', 'caja@quipu.com', 0x01);
+
+-- =========================================
+-- USER - ROLES
+-- =========================================
+INSERT INTO auth_user_roles (user_id, role_id)
+SELECT u.id, r.id
+FROM auth_users u
+JOIN auth_roles r ON u.tenant_id = r.tenant_id
+WHERE 
+    (u.username = 'admin' AND r.name = 'Administrador')
+ OR (u.username = 'dev1' AND r.name = 'Desarrollador')
+ OR (u.username = 'vendedor' AND r.name = 'Vendedor')
+ OR (u.username = 'cajero' AND r.name = 'Cajero');
+
+-- =========================================
+-- USER - COMPANIES
+-- =========================================
+INSERT INTO auth_user_companies (user_id, company_id, is_default)
+SELECT u.id, c.id, 1
+FROM auth_users u
+JOIN auth_companies c ON c.id = @CompQuipu1
+WHERE u.username IN ('admin', 'vendedor', 'cajero');
+
+
+
+
+
+
 
 ROLLBACK
