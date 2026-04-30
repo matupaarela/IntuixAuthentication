@@ -35,73 +35,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         _currentUser = currentUser;
     }
 
-    //public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
-    //{
-    //    // 1. Buscar usuario
-    //    var user = await _userRepo.GetByUsernameAsync(request.Username);
-
-    //    if (user == null || !user.IsActive)
-    //        throw new Exception("Invalid credentials");
-
-    //    if (user.IsLocked)
-    //        throw new Exception("User locked");
-
-    //    // 2. Validar password
-    //    if (request.Password != user.PasswordHash)
-    //    {
-    //        user.FailedAttempts++;
-
-    //        // (opcional) lock después de N intentos
-    //        if (user.FailedAttempts >= 5)
-    //            user.IsLocked = true;
-
-    //        throw new Exception("Invalid credentials");
-    //    }
-
-    //    // reset intentos
-    //    user.FailedAttempts = 0;
-    //    user.LastLogin = DateTime.UtcNow;
-
-    //    // 3. Obtener empresa por defecto
-    //    var companyId = await _userRepo.GetDefaultCompanyAsync(user.Id);
-
-    //    if (companyId == null)
-    //        throw new Exception("User has no company assigned");
-
-    //    // 4. Roles y permisos
-    //    var roles = await _userRepo.GetRolesAsync(user.Id);
-    //    var permissions = await _userRepo.GetPermissionsAsync(user.Id);
-
-    //    // 5. Generar JWT
-    //    var accessToken = _jwtProvider.GenerateToken(user, companyId.Value, roles, permissions);
-
-    //    // 6. Refresh token
-    //    var (refreshToken, hash) = _refreshService.Generate();
-
-    //    var refreshEntity = new Domain.Entities.RefreshToken
-    //    {
-    //        Id = Guid.NewGuid(),
-    //        UserId = user.Id,
-    //        TokenHash = hash,
-    //        ExpiresAt = DateTime.UtcNow.AddDays(7),
-    //        CreatedAt = DateTime.UtcNow
-    //    };
-
-    //    await _refreshRepo.AddAsync(refreshEntity);
-    //    await _refreshRepo.SaveChangesAsync();
-
-    //    return new AuthResponse
-    //    {
-    //        AccessToken = accessToken,
-    //        RefreshToken = refreshToken,
-    //        ExpiresAt = DateTime.UtcNow.AddMinutes(15),
-
-    //        UserId = user.Id,
-    //        TenantId = user.TenantId,
-    //        CompanyId = companyId.Value
-    //    };
-    //}
-
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         // 🔹 0. Resolver tenant
@@ -122,8 +55,16 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         if (user.IsLocked)
             throw new Exception("User locked");
 
-        // 🔹 3. Validar password (⚠️ luego cambiamos a hash)
-        if (request.Password != user.PasswordHash)
+        //var pass = _hasher.Hash(request.Password);
+        //var passToDB = Convert.ToBase64String(pass);
+
+        // 🔹 3. Validar password
+        var isValid = _hasher.Verify(
+            request.Password,
+            Convert.FromBase64String(user.PasswordHash)
+        );
+
+        if (!isValid)
         {
             user.FailedAttempts++;
 

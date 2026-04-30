@@ -9,6 +9,9 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
     {
         builder.ToTable("auth_role_permissions");
 
+        builder.Property(x => x.RoleId).HasColumnName("role_id");
+        builder.Property(x => x.PermissionId).HasColumnName("permission_id");
+
         builder.HasKey(x => new { x.RoleId, x.PermissionId });
     }
 }

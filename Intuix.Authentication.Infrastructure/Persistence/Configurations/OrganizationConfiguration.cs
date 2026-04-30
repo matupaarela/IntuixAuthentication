@@ -10,6 +10,12 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
     {
         builder.ToTable("auth_organizations");
 
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.TenantId).HasColumnName("tenant_id");
+        builder.Property(x => x.Name).HasColumnName("name");
+        builder.Property(x => x.IsActive).HasColumnName("is_active");
+
         // 🔹 PK
         builder.HasKey(x => x.Id);
 

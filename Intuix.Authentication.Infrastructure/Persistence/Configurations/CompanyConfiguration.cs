@@ -10,6 +10,12 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
     {
         builder.ToTable("auth_companies");
 
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.OrganizationId).HasColumnName("organization_id");
+        builder.Property(x => x.Name).HasColumnName("name");
+        builder.Property(x => x.Ruc).HasColumnName("ruc");
+        builder.Property(x => x.IsActive).HasColumnName("is_active");
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Name)
