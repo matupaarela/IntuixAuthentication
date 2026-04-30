@@ -7,4 +7,6 @@ public interface ICurrentUser
     Guid CompanyId { get; }
 
     bool IsAuthenticated { get; }
+
+    void SetTenant(Guid tenantId);
 }

@@ -1,5 +1,6 @@
 ﻿using Intuix.Authentication.Application.Common.Interfaces;
 using Intuix.Authentication.Domain.Entities;
+using Intuix.Authentication.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Intuix.Authentication.Infrastructure.Persistence;
@@ -25,8 +26,18 @@ public class AuthDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthDbContext).Assembly);
-        base.OnModelCreating(modelBuilder);
+        //modelBuilder.ApplyConfiguration(new TenantConfiguration());
+        //modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
+        //modelBuilder.ApplyConfiguration(new CompanyConfiguration());
+        //modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        //modelBuilder.ApplyConfiguration(new PermissionConfiguration());
+        //modelBuilder.ApplyConfiguration(new UserConfiguration());
+        //modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
+        //modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+        //modelBuilder.ApplyConfiguration(new UserCompanyConfiguration());
+        //modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
 
         modelBuilder.Entity<User>()
         .HasQueryFilter(u => u.TenantId == _currentUser.TenantId);
@@ -36,5 +47,8 @@ public class AuthDbContext : DbContext
 
         modelBuilder.Entity<Organization>()
             .HasQueryFilter(o => o.TenantId == _currentUser.TenantId);
+
+
+        base.OnModelCreating(modelBuilder);
     }
 }

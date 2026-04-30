@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Intuix.Authentication.Application.Auth.Commands.Login;
 
-public record LoginCommand(string Username, string Password) : IRequest<AuthResponse>;
+public record LoginCommand(string Username, string Password, string TenantCode) : IRequest<AuthResponse>;

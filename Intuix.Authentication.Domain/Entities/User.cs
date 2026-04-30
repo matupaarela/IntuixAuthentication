@@ -16,9 +16,9 @@ public class User
     public DateTime? LastLogin { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public Tenant Tenant { get; set; } = default!;
+    //public Tenant Tenant { get; set; } = default!;
 
-    public ICollection<UserCompany> UserCompanies { get; set; } = new List<UserCompany>();
-    public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+    //public ICollection<UserCompany> UserCompanies { get; set; } = new List<UserCompany>();
+    //public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    //public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

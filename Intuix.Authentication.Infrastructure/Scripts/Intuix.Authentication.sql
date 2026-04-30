@@ -15,19 +15,19 @@ dotnet ef database update --project ./Intuix.Authentication.Infrastructure --sta
 
 /*
 CREATE TABLE auth_tenants (
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     name NVARCHAR(150) NOT NULL,
     code NVARCHAR(50) NOT NULL UNIQUE,
     is_active BIT NOT NULL DEFAULT 1,
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME()
 );
 
 CREATE TABLE auth_organizations (
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     tenant_id UNIQUEIDENTIFIER NOT NULL,
     name NVARCHAR(150) NOT NULL,
     is_active BIT NOT NULL DEFAULT 1,
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 
     FOREIGN KEY (tenant_id) REFERENCES auth_tenants(id)
 );
@@ -43,12 +43,13 @@ CREATE TABLE auth_companies (
 );
 
 CREATE TABLE auth_users (
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     tenant_id UNIQUEIDENTIFIER NOT NULL,
 
     username NVARCHAR(100) NOT NULL,
     email NVARCHAR(150) NOT NULL,
-    password_hash VARBINARY(512) NOT NULL,
+    password_hash NVARCHAR(500) NOT NULL,
 
     is_active BIT NOT NULL DEFAULT 1,
     is_locked BIT NOT NULL DEFAULT 0,
@@ -56,7 +57,6 @@ CREATE TABLE auth_users (
     failed_attempts INT NOT NULL DEFAULT 0,
     last_login DATETIME2 NULL,
 
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 
     CONSTRAINT UQ_user UNIQUE (tenant_id, username),
     FOREIGN KEY (tenant_id) REFERENCES auth_tenants(id)
@@ -125,7 +125,7 @@ CREATE TABLE auth_refresh_tokens (
 
 -- SEEDS
 
-
+ 
 -- =========================================
 -- TENANTS
 -- =========================================
@@ -195,11 +195,12 @@ WHERE r.name = 'Administrador';
 -- =========================================
 INSERT INTO auth_users (id, tenant_id, username, email, password_hash)
 VALUES
-(NEWID(), @TenantIntuix, 'admin', 'admin@intuix.com', 0x01),
-(NEWID(), @TenantIntuix, 'dev1', 'dev1@intuix.com', 0x01),
-(NEWID(), @TenantQuipu,  'admin', 'admin@quipu.com', 0x01),
-(NEWID(), @TenantQuipu,  'vendedor', 'ventas@quipu.com', 0x01),
-(NEWID(), @TenantQuipu,  'cajero', 'caja@quipu.com', 0x01);
+(NEWID(), @TenantIntuix, 'admin', 'admin@intuix.com', 'AQAAAAIAAYagAAAAEJUAlRE81Nv30wZm1N35JUuNQZSy0TBfO6MkRF4tnCV2CcJnXKsWrq+6yjs4VaZ8sQ=='), -- Admin123!
+(NEWID(), @TenantIntuix, 'dev1', 'dev1@intuix.com', 'AQAAAAIAAYagAAAAEGI894JmlYzvynitg1Fmdm+FTJJE3LV5SexKICqsBAXWutci9MXHUjFrsGPO3nULng=='), -- Dev123!
+(NEWID(), @TenantQuipu,  'vendedor', 'ventas@quipu.com', 'AQAAAAIAAYagAAAAEOD+KOXvhRMAJZJrbMBl656aZemgPg2SV6nu5m9ffW6cdczB/Gph1p+cY21kIc9adA=='), -- Venta123!
+(NEWID(), @TenantQuipu,  'cajero', 'caja@quipu.com', 'AQAAAAIAAYagAAAAEPJwzdRSAH5B8d2UvtjXY3Lxw2mVh0KFtuXnAZd54S1X3gN7uKKGxI4NktViB6hIVw=='); -- Caja123!
+
+select * from auth_users
 
 -- =========================================
 -- USER - ROLES

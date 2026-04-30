@@ -10,6 +10,12 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
     {
         builder.ToTable("auth_tenants");
 
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.Name).HasColumnName("name");
+        builder.Property(x => x.Code).HasColumnName("code");
+        builder.Property(x => x.IsActive).HasColumnName("is_active");
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Name)

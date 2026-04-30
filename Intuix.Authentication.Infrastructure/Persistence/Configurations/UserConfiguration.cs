@@ -10,6 +10,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable("auth_users");
 
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.TenantId).HasColumnName("tenant_id");
+        builder.Property(x => x.Username).HasColumnName("username");
+        builder.Property(x => x.Email).HasColumnName("email");
+        builder.Property(x => x.PasswordHash).HasColumnName("password_hash");
+        builder.Property(x => x.IsActive).HasColumnName("is_active");
+        builder.Property(x => x.IsLocked).HasColumnName("is_locked");
+        builder.Property(x => x.FailedAttempts).HasColumnName("failed_attempts");
+        builder.Property(x => x.LastLogin).HasColumnName("last_login");
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Username)
@@ -27,14 +38,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => new { x.TenantId, x.Username })
             .IsUnique();
 
-        builder.HasOne<Tenant>()
-            .WithMany()
-            .HasForeignKey(x => x.TenantId)
-            .OnDelete(DeleteBehavior.Restrict);
+        //builder.HasOne<Tenant>()
+        //    .WithMany()
+        //    .HasForeignKey(x => x.TenantId)
+        //    .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(x => x.RefreshTokens)
-            .WithOne(x => x.User)
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        //builder.HasMany(x => x.RefreshTokens)
+        //    .WithOne(x => x.User)
+        //    .HasForeignKey(x => x.UserId)
+        //    .OnDelete(DeleteBehavior.Restrict);
     }
 }

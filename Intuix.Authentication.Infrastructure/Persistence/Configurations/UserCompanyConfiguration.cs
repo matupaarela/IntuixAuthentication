@@ -12,10 +12,10 @@ public class UserCompanyConfiguration : IEntityTypeConfiguration<UserCompany>
 
         builder.HasKey(x => new { x.UserId, x.CompanyId });
 
-        builder.HasOne(x => x.User)
-            .WithMany(x => x.UserCompanies)
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        //builder.HasOne(x => x.User)
+        //    .WithMany(x => x.UserCompanies)
+        //    .HasForeignKey(x => x.UserId)
+        //    .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Company)
             .WithMany()

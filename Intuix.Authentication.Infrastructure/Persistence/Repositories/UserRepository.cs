@@ -20,10 +20,12 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
+        var users = await _context.Users
+    .IgnoreQueryFilters()
+    .ToListAsync();
+
         var user = await _context.Users
-            .Include(x => x.UserRoles)
-            .ThenInclude(x => x.Role)
-            .FirstOrDefaultAsync(x => x.Username == username);
+            .FirstOrDefaultAsync(x => x.Username.ToLower() == username.ToLower());
 
         return user;
     }

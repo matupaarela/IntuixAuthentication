@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
     {
         var result = await _mediator.Send(
-            new LoginCommand(request.Username, request.Password));
+            new LoginCommand(request.Username, request.Password, request.TenantCode));
 
         return Ok(result);
     }
