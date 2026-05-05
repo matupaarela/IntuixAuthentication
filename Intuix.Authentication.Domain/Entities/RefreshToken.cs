@@ -6,7 +6,7 @@ public class RefreshToken
     public Guid UserId { get; set; }
 
     public byte[] TokenHash { get; set; } = default!;
-    public string Token { get; set; } = default!;
+    //public string Token { get; set; } = default!;
     public DateTime ExpiresAt { get; set; }
 
     public DateTime CreatedAt { get; set; }

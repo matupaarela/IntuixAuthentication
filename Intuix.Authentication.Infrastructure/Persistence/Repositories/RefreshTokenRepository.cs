@@ -13,13 +13,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _context = context;
     }
 
-    public async Task<RefreshToken?> GetAsync(string token)
-    {
-        return await _context.RefreshTokens
-            .Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.Token == token);
-    }
-
     public async Task AddAsync(RefreshToken token)
     {
         await _context.RefreshTokens.AddAsync(token);
