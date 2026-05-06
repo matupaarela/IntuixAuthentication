@@ -14,8 +14,12 @@ public class RefreshToken
 
     public Guid? ReplacedByToken { get; set; }
 
+    public string? Device { get; set; }
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
+
+    // (seguridad)
+    public string? RevocationReason { get; set; }
 
     public User User { get; set; } = default!;
 }

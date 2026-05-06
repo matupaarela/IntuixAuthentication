@@ -23,8 +23,11 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         await _context.SaveChangesAsync();
     }
 
-    public Task<RefreshToken?> GetByHashAsync(byte[] hash)
+    public async Task<RefreshToken?> GetByHashAsync(byte[] hash)
     {
-        throw new NotImplementedException();
+        return await _context.RefreshTokens
+            .Include(x => x.User)
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.TokenHash == hash);
     }
 }

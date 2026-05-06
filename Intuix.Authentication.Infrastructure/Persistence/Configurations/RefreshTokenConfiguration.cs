@@ -20,6 +20,9 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(x => x.IpAddress).HasColumnName("ip_address");
         builder.Property(x => x.UserAgent).HasColumnName("user_agent");
 
+        builder.Property(x => x.Device).HasColumnName("device");
+        builder.Property(x => x.RevocationReason).HasColumnName("revocation_reason");
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.TokenHash)
