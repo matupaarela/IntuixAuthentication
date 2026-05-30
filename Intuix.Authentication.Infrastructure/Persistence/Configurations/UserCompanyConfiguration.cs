@@ -12,6 +12,10 @@ public class UserCompanyConfiguration : IEntityTypeConfiguration<UserCompany>
 
         builder.HasKey(x => new { x.UserId, x.CompanyId });
 
+        builder.Property(x => x.UserId).HasColumnName("user_id");
+        builder.Property(x => x.CompanyId).HasColumnName("company_id");
+        builder.Property(x => x.IsDefault).HasColumnName("is_default");
+
         //builder.HasOne(x => x.User)
         //    .WithMany(x => x.UserCompanies)
         //    .HasForeignKey(x => x.UserId)

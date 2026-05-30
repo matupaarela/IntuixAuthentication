@@ -13,7 +13,7 @@ dotnet ef database update --project ./Intuix.Authentication.Infrastructure --sta
 */
 --SELECT COUNT(*) FROM auth_users
 
-/*
+
 CREATE TABLE auth_tenants (
     created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -106,13 +106,13 @@ CREATE TABLE auth_user_roles (
 
 
 CREATE TABLE auth_refresh_tokens (
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER NOT NULL,
 
     token_hash VARBINARY(512) NOT NULL,
     expires_at DATETIME2 NOT NULL,
 
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     revoked_at DATETIME2 NULL,
 
     replaced_by_token UNIQUEIDENTIFIER NULL,
@@ -121,7 +121,9 @@ CREATE TABLE auth_refresh_tokens (
 
     FOREIGN KEY (user_id) REFERENCES auth_users(id)
 );
-*/
+
+ALTER TABLE auth_refresh_tokens ADD device VARCHAR(100);
+ALTER TABLE auth_refresh_tokens ADD revocation_reason VARCHAR(250);
 
 -- SEEDS
 

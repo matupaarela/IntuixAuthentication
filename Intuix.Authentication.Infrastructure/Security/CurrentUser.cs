@@ -1,7 +1,6 @@
 ﻿using Intuix.Authentication.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Http;
-
-namespace Intuix.Authentication.Infrastructure.Security;
+using System.Security.Claims;
 
 public class CurrentUser : ICurrentUser
 {
@@ -13,19 +12,31 @@ public class CurrentUser : ICurrentUser
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid UserId =>
-        GetGuidClaim("sub");
+    private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
 
-    public Guid TenantId =>
-        GetGuidClaim("tenant") != Guid.Empty
-            ? GetGuidClaim("tenant")
-            : _tenantIdOverride ?? Guid.Empty;
+    public Guid UserId =>
+        GetGuidClaim("sub") != Guid.Empty
+            ? GetGuidClaim("sub")
+            : GetGuidClaim(ClaimTypes.NameIdentifier);
+
+    public Guid TenantId
+    {
+        get
+        {
+            var tenant = GetGuidClaim("tenant");
+
+            if (tenant != Guid.Empty)
+                return tenant;
+
+            return _tenantIdOverride ?? Guid.Empty;
+        }
+    }
 
     public Guid CompanyId =>
         GetGuidClaim("company");
 
     public bool IsAuthenticated =>
-        _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+        User?.Identity?.IsAuthenticated ?? false;
 
     public void SetTenant(Guid tenantId)
     {
@@ -34,10 +45,10 @@ public class CurrentUser : ICurrentUser
 
     private Guid GetGuidClaim(string type)
     {
-        var value = _httpContextAccessor.HttpContext?
-            .User?
-            .FindFirst(type)?.Value;
+        var value = User?.FindFirst(type)?.Value;
 
-        return value != null ? Guid.Parse(value) : Guid.Empty;
+        return Guid.TryParse(value, out var guid)
+            ? guid
+            : Guid.Empty;
     }
 }

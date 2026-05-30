@@ -6,7 +6,7 @@ public class RefreshToken
     public Guid UserId { get; set; }
 
     public byte[] TokenHash { get; set; } = default!;
-    public string Token { get; set; } = default!;
+    //public string Token { get; set; } = default!;
     public DateTime ExpiresAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -14,8 +14,12 @@ public class RefreshToken
 
     public Guid? ReplacedByToken { get; set; }
 
+    public string? Device { get; set; }
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
+
+    // (seguridad)
+    public string? RevocationReason { get; set; }
 
     public User User { get; set; } = default!;
 }

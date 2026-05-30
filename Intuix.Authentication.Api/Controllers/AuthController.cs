@@ -49,21 +49,27 @@ public class AuthController : ControllerBase
     [HttpPost("revoke")]
     public async Task<IActionResult> Revoke(RefreshTokenRequest request)
     {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers["User-Agent"].ToString();
+        var device = ParseDevice(userAgent); // opcional
+
         // lo implementamos en siguiente paso si quieres
         return Ok(new { message = "Token revoked (pending implementation)" });
     }
 
-    // 👤 INFO DEL USUARIO ACTUAL
     [Authorize]
     [HttpGet("me")]
     public IActionResult Me()
     {
+        var claims = User.Claims.Select(x => new { x.Type, x.Value });
+
         return Ok(new
         {
             userId = _currentUser.UserId,
             tenantId = _currentUser.TenantId,
             companyId = _currentUser.CompanyId,
-            isAuthenticated = _currentUser.IsAuthenticated
+            isAuthenticated = _currentUser.IsAuthenticated,
+            claims
         });
     }
 

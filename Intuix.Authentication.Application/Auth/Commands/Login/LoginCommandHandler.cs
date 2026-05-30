@@ -55,8 +55,16 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         if (user.IsLocked)
             throw new Exception("User locked");
 
-        // 🔹 3. Validar password (⚠️ luego cambiamos a hash)
-        if (request.Password != user.PasswordHash)
+        //var pass = _hasher.Hash(request.Password);
+        //var passToDB = Convert.ToBase64String(pass);
+
+        // 🔹 3. Validar password
+        var isValid = _hasher.Verify(
+            request.Password,
+            Convert.FromBase64String(user.PasswordHash)
+        );
+
+        if (!isValid)
         {
             user.FailedAttempts++;
 
