@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intuix.Authentication.Infra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intuix.Authentication.Api", "Intuix.Authentication.Api\Intuix.Authentication.Api.csproj", "{D1A561A8-E098-48D1-BD7A-6CDB3018AE19}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Intuix.Authentication.ArchitectureTests", "tests\Intuix.Authentication.ArchitectureTests\Intuix.Authentication.ArchitectureTests.csproj", "{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{D1A561A8-E098-48D1-BD7A-6CDB3018AE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1A561A8-E098-48D1-BD7A-6CDB3018AE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1A561A8-E098-48D1-BD7A-6CDB3018AE19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{19C12B76-DC58-4DEE-85F9-94188E4CE15F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0B20D299-D09F-46D4-A642-1896999B73B8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{D1A561A8-E098-48D1-BD7A-6CDB3018AE19} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{7E1D1B5C-0C5E-4D8F-9B28-4C0B6D21F0D4} = {D6EC2A2B-BF08-4ADB-B804-55B32E919B56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F9D67071-91B6-40ED-B06C-8E8CE32945F8}

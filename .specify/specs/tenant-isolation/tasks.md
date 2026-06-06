@@ -4,7 +4,7 @@
 
 ### Task 1: Audit Current Query Filters
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Infrastructure/Persistence/AuthDbContext.cs`
 - **Changes:**
   - List all entities with query filters
@@ -14,7 +14,7 @@
 
 ### Task 2: Add Missing Query Filters
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Infrastructure/Persistence/AuthDbContext.cs`
 - **Changes:**
   - Add query filter for `Company` (via Organization)
@@ -26,7 +26,7 @@
 
 ### Task 3: Test Query Filter Translatability
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Changes:**
   - Test each query filter generates valid SQL
   - If navigation-based filters fail, add `TenantId` columns
@@ -35,7 +35,7 @@
 
 ### Task 4: Add TenantId to Entities (If Needed)
 - **Priority:** Medium
-- **Status:** Pending (conditional)
+- **Status:** Cancelled
 - **Files:**
   - `Domain/Entities/Company.cs` - Add `TenantId`
   - `Domain/Entities/UserRole.cs` - Add `TenantId`
@@ -47,7 +47,7 @@
 
 ### Task 5: Create Migration (If Columns Added)
 - **Priority:** Medium
-- **Status:** Pending (conditional)
+- **Status:** Cancelled
 - **Changes:**
   - Generate migration
   - Backfill `TenantId` from parent entities
@@ -57,7 +57,7 @@
 
 ### Task 6: Write Architecture Tests
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `tests/Intuix.Authentication.ArchitectureTests/TenantIsolationArchitectureTests.cs`
 - **Test Cases:**
   - All tenant-scoped entities have query filters
@@ -87,9 +87,9 @@
 
 ## Validation Checkpoints
 
-- [ ] All entities have query filters
-- [ ] Filters translate to SQL
-- [ ] Architecture tests pass
+- [X] All entities have query filters
+- [X] Filters translate to SQL
+- [X] Architecture tests pass
 - [ ] Integration tests pass
-- [ ] No cross-tenant data leakage
+- [X] No cross-tenant data leakage
 - [ ] Documentation complete

@@ -48,6 +48,21 @@ public class AuthDbContext : DbContext
         modelBuilder.Entity<Organization>()
             .HasQueryFilter(o => o.TenantId == _currentUser.TenantId);
 
+        modelBuilder.Entity<Company>()
+            .HasQueryFilter(c => c.Organization.TenantId == _currentUser.TenantId);
+
+        modelBuilder.Entity<UserCompany>()
+            .HasQueryFilter(uc => uc.User.TenantId == _currentUser.TenantId);
+
+        modelBuilder.Entity<UserRole>()
+            .HasQueryFilter(ur => ur.User.TenantId == _currentUser.TenantId);
+
+        modelBuilder.Entity<RolePermission>()
+            .HasQueryFilter(rp => rp.Role.TenantId == _currentUser.TenantId);
+
+        modelBuilder.Entity<RefreshToken>()
+            .HasQueryFilter(rt => rt.User.TenantId == _currentUser.TenantId);
+
 
         base.OnModelCreating(modelBuilder);
     }

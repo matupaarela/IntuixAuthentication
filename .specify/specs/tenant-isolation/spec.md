@@ -6,7 +6,7 @@ Tenant isolation is the foundation of multi-tenancy. Every tenant-scoped entity 
 
 ## Problem Statement
 
-The current implementation applies query filters to `User`, `Role`, and `Organization` entities. However, `Company`, `UserRole`, `UserCompany`, `RefreshToken`, and `RolePermission` entities lack query filters. Additionally, there are no architecture tests to verify isolation is maintained.
+The implementation applies query filters to all tenant-scoped entities, including direct and indirect scopes. Architecture tests verify the model and runtime isolation behavior.
 
 ## Goals
 
@@ -37,14 +37,14 @@ The current implementation applies query filters to `User`, `Role`, and `Organiz
 
 ## Acceptance Criteria
 
-- [ ] All tenant-scoped entities have query filters
-- [ ] Architecture tests verify query filter presence
-- [ ] Cross-tenant queries return empty results
-- [ ] `Company` entity is filtered via `Organization.TenantId`
-- [ ] `UserRole` entity is filtered via `User.TenantId`
-- [ ] `UserCompany` entity is filtered via `User.TenantId`
-- [ ] `RefreshToken` entity is filtered via `User.TenantId`
-- [ ] `RolePermission` entity is filtered via `Role.TenantId`
+- [X] All tenant-scoped entities have query filters
+- [X] Architecture tests verify query filter presence
+- [X] Cross-tenant queries return empty results
+- [X] `Company` entity is filtered via `Organization.TenantId`
+- [X] `UserRole` entity is filtered via `User.TenantId`
+- [X] `UserCompany` entity is filtered via `User.TenantId`
+- [X] `RefreshToken` entity is filtered via `User.TenantId`
+- [X] `RolePermission` entity is filtered via `Role.TenantId`
 
 ## Tenant Isolation Rules
 
@@ -68,7 +68,7 @@ The current implementation applies query filters to `User`, `Role`, and `Organiz
 
 ## Database Impact
 
-- Modify `AuthDbContext.OnModelCreating` to add missing query filters
+- `AuthDbContext.OnModelCreating` includes tenant query filters for all scoped entities
 
 ## Risks
 

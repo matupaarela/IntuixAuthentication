@@ -16,10 +16,10 @@ public class UserCompanyConfiguration : IEntityTypeConfiguration<UserCompany>
         builder.Property(x => x.CompanyId).HasColumnName("company_id");
         builder.Property(x => x.IsDefault).HasColumnName("is_default");
 
-        //builder.HasOne(x => x.User)
-        //    .WithMany(x => x.UserCompanies)
-        //    .HasForeignKey(x => x.UserId)
-        //    .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Company)
             .WithMany()
