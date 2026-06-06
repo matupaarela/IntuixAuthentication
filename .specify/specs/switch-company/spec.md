@@ -40,13 +40,13 @@ The current `SwitchCompanyCommandHandler` works but lacks validation that the co
 
 ## Acceptance Criteria
 
-- [ ] Authenticated user with valid company → 200 with new JWT
-- [ ] Company not assigned to user → 400 "Unauthorized company"
+- [X] Authenticated user with valid company → 200 with new JWT
+- [X] Company not assigned to user → 400 "Unauthorized company"
 - [ ] Non-existent company → 400 "Company not found"
 - [ ] Inactive company → 400 "Company is inactive"
-- [ ] Unauthenticated → 401
-- [ ] New JWT contains the switched company ID
-- [ ] Refresh token is not changed
+- [X] Unauthenticated → 401
+- [X] New JWT contains the switched company ID
+- [X] Refresh token is not changed
 
 ## Security Requirements
 

@@ -4,7 +4,7 @@
 
 ### Task 1: Fix Password Verification in LoginCommandHandler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Application/Auth/Commands/Login/LoginCommandHandler.cs`
 - **Changes:**
   - Replace `if (request.Password != user.PasswordHash)` with `if (!_hasher.Verify(request.Password, user.PasswordHash))`
@@ -50,7 +50,7 @@
 
 ### Task 5: Verify JWT Claims
 - **Priority:** Medium
-- **Status:** Pending
+- **Status:** Completed
 - **Validation:**
   - Decode JWT from login response
   - Verify claims: sub, tenant, company, role, perm, jti
@@ -60,7 +60,7 @@
 
 ### Task 6: Verify Refresh Token Storage
 - **Priority:** Medium
-- **Status:** Pending
+- **Status:** Completed
 - **Validation:**
   - After login, refresh token hash exists in auth_refresh_tokens
   - Token hash matches SHA256 of returned refresh token
@@ -79,14 +79,14 @@
 
 ## Validation Checkpoints
 
-- [ ] Password verification uses IPasswordHasher
-- [ ] No plain text password comparison
-- [ ] Generic error messages returned
-- [ ] JWT contains all required claims
-- [ ] Refresh token is stored hashed
+- [X] Password verification uses IPasswordHasher
+- [X] No plain text password comparison
+- [X] Generic error messages returned
+- [X] JWT contains all required claims
+- [X] Refresh token is stored hashed
 - [ ] Account lockout works after 5 attempts
-- [ ] FailedAttempts resets on success
-- [ ] LastLogin is updated on success
+- [X] FailedAttempts resets on success
+- [X] LastLogin is updated on success
 - [ ] All unit tests pass
 - [ ] All integration tests pass
-- [ ] No sensitive data in logs
+- [X] No sensitive data in logs

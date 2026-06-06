@@ -11,7 +11,7 @@
 
 ### Task 2: Audit All Controllers for Authorization
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:** All controllers in `Api/Controllers/`
 - **Changes:**
   - Verify all endpoints have `[Authorize]` or `[Authorize(Policy = "...")]`
@@ -74,7 +74,7 @@
 
 ## Validation Checkpoints
 
-- [ ] All endpoints have authorization
+- [X] All endpoints have authorization
 - [ ] Permission constants defined
 - [ ] Seed data created
 - [ ] Architecture tests pass

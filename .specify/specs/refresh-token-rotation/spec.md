@@ -47,15 +47,15 @@ The current implementation performs basic rotation but lacks chain revocation on
 
 ## Acceptance Criteria
 
-- [ ] Valid refresh token returns new access token + new refresh token
-- [ ] Old refresh token is marked as revoked
-- [ ] Old token's `ReplacedByToken` points to new token ID
-- [ ] Expired refresh token is rejected
+- [X] Valid refresh token returns new access token + new refresh token
+- [X] Old refresh token is marked as revoked
+- [X] Old token's `ReplacedByToken` points to new token ID
+- [X] Expired refresh token is rejected
 - [ ] Revoked refresh token triggers family revocation
 - [ ] Reuse detection revokes all tokens in the chain
 - [ ] User's refresh tokens are all revoked on reuse detection
 - [ ] IP address and User-Agent are captured
-- [ ] New JWT contains current user permissions
+- [X] New JWT contains current user permissions
 
 ## Security Requirements
 

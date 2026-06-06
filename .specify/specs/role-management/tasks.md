@@ -95,8 +95,8 @@
 
 ## Validation Checkpoints
 
-- [ ] Tenant scoping enforced
-- [ ] Name uniqueness enforced
+- [X] Tenant scoping enforced
+- [X] Name uniqueness enforced
 - [ ] Permission assignment works
 - [ ] All unit tests pass
 - [ ] All integration tests pass

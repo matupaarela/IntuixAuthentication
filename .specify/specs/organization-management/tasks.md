@@ -69,7 +69,7 @@
 
 ## Validation Checkpoints
 
-- [ ] Tenant scoping enforced
+- [X] Tenant scoping enforced
 - [ ] Permission checks work
 - [ ] All unit tests pass
 - [ ] All integration tests pass

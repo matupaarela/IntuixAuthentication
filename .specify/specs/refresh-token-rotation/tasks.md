@@ -87,13 +87,13 @@
 
 ## Validation Checkpoints
 
-- [ ] Token rotation works correctly
-- [ ] Old token is revoked on rotation
-- [ ] ReplacedByToken is set correctly
-- [ ] Reuse detection works
+- [X] Token rotation works correctly
+- [X] Old token is revoked on rotation
+- [X] ReplacedByToken is set correctly
+- [X] Reuse detection works
 - [ ] Chain revocation is atomic
 - [ ] IP and User-Agent captured
-- [ ] Expired tokens rejected
+- [X] Expired tokens rejected
 - [ ] All unit tests pass
 - [ ] All integration tests pass
 - [ ] Security events logged

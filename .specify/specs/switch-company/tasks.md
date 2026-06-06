@@ -70,7 +70,7 @@
 
 - [ ] Company validation works
 - [ ] Tenant isolation enforced
-- [ ] New JWT contains correct company
-- [ ] Refresh token not rotated
+- [X] New JWT contains correct company
+- [X] Refresh token not rotated
 - [ ] All unit tests pass
 - [ ] All integration tests pass

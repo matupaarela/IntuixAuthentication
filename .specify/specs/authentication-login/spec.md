@@ -55,18 +55,18 @@ The current login implementation uses plain text password comparison (`request.P
 
 ## Acceptance Criteria
 
-- [ ] User can login with valid credentials and receives JWT + refresh token
-- [ ] Login fails with "Invalid credentials" for wrong username
-- [ ] Login fails with "Invalid credentials" for wrong password
-- [ ] Login fails with "Invalid tenant" for non-existent tenant code
-- [ ] Login fails with "User locked" for locked accounts
+- [X] User can login with valid credentials and receives JWT + refresh token
+- [X] Login fails with "Invalid credentials" for wrong username
+- [X] Login fails with "Invalid credentials" for wrong password
+- [X] Login fails with "Invalid tenant" for non-existent tenant code
+- [X] Login fails with "User locked" for locked accounts
 - [ ] Account is locked after 5 failed password attempts
-- [ ] `FailedAttempts` resets to 0 on successful login
-- [ ] `LastLogin` is updated on successful login
-- [ ] JWT contains all required claims (sub, tenant, company, role, perm, jti)
-- [ ] Refresh token hash is stored in database
-- [ ] Response includes userId, tenantId, companyId
-- [ ] Error responses do not reveal whether username exists
+- [X] `FailedAttempts` resets to 0 on successful login
+- [X] `LastLogin` is updated on successful login
+- [X] JWT contains all required claims (sub, tenant, company, role, perm, jti)
+- [X] Refresh token hash is stored in database
+- [X] Response includes userId, tenantId, companyId
+- [X] Error responses do not reveal whether username exists
 
 ## Security Requirements
 

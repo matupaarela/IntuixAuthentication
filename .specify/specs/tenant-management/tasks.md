@@ -122,7 +122,7 @@
 ## Validation Checkpoints
 
 - [ ] CRUD operations work
-- [ ] Code uniqueness enforced
+- [X] Code uniqueness enforced
 - [ ] Permission checks work
 - [ ] Pagination works
 - [ ] All unit tests pass

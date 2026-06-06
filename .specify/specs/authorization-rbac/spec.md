@@ -39,11 +39,11 @@ The current authorization system is implemented but lacks comprehensive testing,
 
 ## Acceptance Criteria
 
-- [ ] All endpoints have authorization attributes
+- [X] All endpoints have authorization attributes
 - [ ] Permission policies work for all features
 - [ ] Architecture tests verify authorization coverage
 - [ ] Permission codes are consistent across the system
-- [ ] JWT claims contain all required permissions
+- [X] JWT claims contain all required permissions
 
 ## Permission Codes
 
