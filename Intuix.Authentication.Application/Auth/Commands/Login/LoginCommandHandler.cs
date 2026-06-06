@@ -85,8 +85,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         var roles = await _userRepo.GetRolesAsync(user.Id);
         var permissions = await _userRepo.GetPermissionsAsync(user.Id);
 
-        var accessToken = _jwtProvider.GenerateToken(user, companyId.Value, roles, permissions);
-
         var (refreshToken, hash) = _refreshService.Generate();
 
         var refreshEntity = new Domain.Entities.RefreshToken
@@ -97,6 +95,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
             ExpiresAt = DateTime.UtcNow.AddDays(7),
             CreatedAt = DateTime.UtcNow
         };
+
+        var accessToken = _jwtProvider.GenerateToken(user, companyId.Value, refreshEntity.Id, roles, permissions);
 
         await _refreshRepo.AddAsync(refreshEntity);
         await _refreshRepo.SaveChangesAsync();

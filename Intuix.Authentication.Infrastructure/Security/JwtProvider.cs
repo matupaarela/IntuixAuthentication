@@ -17,7 +17,7 @@ public class JwtProvider : IJwtProvider
         _config = config;
     }
 
-    public string GenerateToken(User user, Guid companyId, IEnumerable<string> roles, IEnumerable<string> permissions)
+    public string GenerateToken(User user, Guid companyId, Guid refreshTokenId, IEnumerable<string> roles, IEnumerable<string> permissions)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
@@ -29,6 +29,7 @@ public class JwtProvider : IJwtProvider
             new("sub", user.Id.ToString()),
             new("tenant", user.TenantId.ToString()),
             new("company", companyId.ToString()),
+            new("sid", refreshTokenId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

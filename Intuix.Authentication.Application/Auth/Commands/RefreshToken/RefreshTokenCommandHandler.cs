@@ -80,7 +80,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         await _refreshRepo.SaveChangesAsync();
 
         // 5. Nuevo JWT
-        var accessToken = _jwtProvider.GenerateToken(user, companyId, roles, permissions);
+        var accessToken = _jwtProvider.GenerateToken(user, companyId, newRefresh.Id, roles, permissions);
 
         return new AuthResponse
         {

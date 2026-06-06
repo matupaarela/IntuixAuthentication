@@ -31,6 +31,44 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             .FirstOrDefaultAsync(x => x.TokenHash == hash);
     }
 
+    public async Task<List<RefreshToken>> GetActiveSessionsByUserAsync(Guid userId)
+    {
+        return await _context.RefreshTokens
+            .AsNoTracking()
+            .Where(x => x.UserId == userId && x.RevokedAt == null)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task RevokeSessionAsync(Guid tokenId, Guid userId)
+    {
+        var token = await _context.RefreshTokens
+            .FirstOrDefaultAsync(x => x.Id == tokenId && x.UserId == userId);
+
+        if (token == null)
+            return;
+
+        token.RevokedAt = DateTime.UtcNow;
+        token.RevocationReason = "Session revoked";
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RevokeAllSessionsExceptCurrentAsync(Guid userId, Guid currentTokenId)
+    {
+        var tokens = await _context.RefreshTokens
+            .Where(x => x.UserId == userId && x.RevokedAt == null && x.Id != currentTokenId)
+            .ToListAsync();
+
+        foreach (var token in tokens)
+        {
+            token.RevokedAt = DateTime.UtcNow;
+            token.RevocationReason = "Revoke all sessions except current";
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task RevokeTokenChainAsync(Guid tokenId, string revocationReason, DateTime revokedAt)
     {
         var current = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Id == tokenId);
