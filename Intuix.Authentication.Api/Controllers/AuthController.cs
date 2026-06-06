@@ -1,4 +1,5 @@
 ﻿using Intuix.Authentication.Application.Auth.Commands.Login;
+using Intuix.Authentication.Application.Auth.Commands.Logout;
 using Intuix.Authentication.Application.Auth.Commands.RefreshToken;
 using Intuix.Authentication.Application.Auth.Commands.SwitchCompany;
 using Intuix.Authentication.Application.Auth.DTOs;
@@ -44,17 +45,24 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    // 🚪 LOGOUT (revocar token)
-    [Authorize]
-    [HttpPost("revoke")]
-    public async Task<IActionResult> Revoke(RefreshTokenRequest request)
+    // 🚪 LOGOUT (revocar token actual)
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(RefreshTokenRequest request)
     {
-        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var userAgent = Request.Headers["User-Agent"].ToString();
-        var device = ParseDevice(userAgent); // opcional
+        await _mediator.Send(new LogoutCommand(request.RefreshToken));
 
-        // lo implementamos en siguiente paso si quieres
-        return Ok(new { message = "Token revoked (pending implementation)" });
+        return Ok(new { message = "Logged out successfully" });
+    }
+
+    // 🚪 LOGOUT ALL
+    [Authorize]
+    [HttpPost("logout-all")]
+    public async Task<IActionResult> LogoutAll()
+    {
+        await _mediator.Send(new LogoutAllCommand());
+
+        return Ok(new { message = "All sessions terminated" });
     }
 
     [Authorize]

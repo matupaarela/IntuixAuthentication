@@ -39,13 +39,13 @@ The current `Revoke` endpoint in `AuthController` is a stub that returns a place
 
 ## Acceptance Criteria
 
-- [ ] POST /auth/logout with valid refresh token → 200, token revoked
-- [ ] POST /auth/logout with already-revoked token → 200 (idempotent)
-- [ ] POST /auth/logout with expired token → 200 (idempotent)
-- [ ] POST /auth/logout-all with valid auth → 200, all user tokens revoked
-- [ ] POST /auth/logout-all without auth → 401
-- [ ] Token chain is revoked on logout
-- [ ] Logout-all revokes all active tokens for user
+- [X] POST /auth/logout with valid refresh token → 200, token revoked
+- [X] POST /auth/logout with already-revoked token → 200 (idempotent)
+- [X] POST /auth/logout with expired token → 200 (idempotent)
+- [X] POST /auth/logout-all with valid auth → 200, all user tokens revoked
+- [X] POST /auth/logout-all without auth → 401
+- [X] Token chain is revoked on logout
+- [X] Logout-all revokes all active tokens for user
 
 ## Security Requirements
 

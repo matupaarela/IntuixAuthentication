@@ -2,5 +2,5 @@
 
 namespace Intuix.Authentication.Application.Auth.Commands.Logout
 {
-    public record LogoutCommand(Guid UserId) : IRequest;
+    public record LogoutCommand(string RefreshToken) : IRequest<Unit>;
 }

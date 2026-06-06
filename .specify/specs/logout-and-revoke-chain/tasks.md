@@ -4,40 +4,41 @@
 
 ### Task 1: Create LogoutCommand and Handler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:**
   - `Application/Auth/Commands/Logout/LogoutCommand.cs`
   - `Application/Auth/Commands/Logout/LogoutCommandHandler.cs`
 - **Changes:**
-  - `LogoutCommand(string RefreshToken) : IRequest`
+  - `LogoutCommand(string RefreshToken) : IRequest<Unit>`
   - Handler: hash → lookup → revoke → revoke chain
 - **Validation:** Token is revoked, chain is revoked
 
 ### Task 2: Create LogoutAllCommand and Handler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:**
   - `Application/Auth/Commands/Logout/LogoutAllCommand.cs`
   - `Application/Auth/Commands/Logout/LogoutAllCommandHandler.cs`
 - **Changes:**
-  - `LogoutAllCommand : IRequest`
+  - `LogoutAllCommand() : IRequest<Unit>`
   - Handler: get userId → revoke all tokens
 - **Validation:** All user tokens revoked
 
 ### Task 3: Add RevokeAllUserTokensAsync to Repository
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:**
   - `Application/Auth/Interfaces/IRefreshTokenRepository.cs`
   - `Infrastructure/Persistence/Repositories/RefreshTokenRepository.cs`
 - **Changes:**
-  - Interface: `Task RevokeAllUserTokensAsync(Guid userId, DateTime revokedAt);`
+  - Interface: `Task RevokeTokenChainAsync(Guid tokenId, string revocationReason, DateTime revokedAt);`
+  - Interface: `Task RevokeAllUserTokensAsync(Guid userId, string revocationReason, DateTime revokedAt);`
   - Implementation: query active tokens, set RevokedAt, SaveChanges
 - **Validation:** All active tokens for user are revoked
 
 ### Task 4: Update AuthController
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Api/Controllers/AuthController.cs`
 - **Changes:**
   - Replace `Revoke` stub with `Logout` endpoint dispatching `LogoutCommand`
@@ -79,10 +80,10 @@
 
 ## Validation Checkpoints
 
-- [ ] Single logout revokes token
-- [ ] Logout is idempotent
-- [ ] Chain revocation works
-- [ ] Logout-all revokes all user tokens
-- [ ] Logout-all requires authentication
+- [X] Single logout revokes token
+- [X] Logout is idempotent
+- [X] Chain revocation works
+- [X] Logout-all revokes all user tokens
+- [X] Logout-all requires authentication
 - [ ] All unit tests pass
 - [ ] All integration tests pass
