@@ -8,6 +8,4 @@ public interface ICurrentUser
     Guid RefreshTokenId { get; }
 
     bool IsAuthenticated { get; }
-
-    void SetTenant(Guid tenantId);
 }

@@ -7,10 +7,11 @@ namespace Intuix.Authentication.Infrastructure.Persistence;
 
 public class AuthDbContext : DbContext
 {
-    private readonly ICurrentUser _currentUser;
-    public AuthDbContext(DbContextOptions<AuthDbContext> options, ICurrentUser currentUser) : base(options)
+    private readonly ITenantContext _tenantContext;
+
+    public AuthDbContext(DbContextOptions<AuthDbContext> options, ITenantContext tenantContext) : base(options)
     {
-        _currentUser = currentUser;
+        _tenantContext = tenantContext;
     }
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
@@ -40,28 +41,28 @@ public class AuthDbContext : DbContext
         //modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
 
         modelBuilder.Entity<User>()
-        .HasQueryFilter(u => u.TenantId == _currentUser.TenantId);
+        .HasQueryFilter(u => u.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<Role>()
-            .HasQueryFilter(r => r.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(r => r.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<Organization>()
-            .HasQueryFilter(o => o.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(o => o.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<Company>()
-            .HasQueryFilter(c => c.Organization.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(c => c.Organization.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<UserCompany>()
-            .HasQueryFilter(uc => uc.User.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(uc => uc.User.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<UserRole>()
-            .HasQueryFilter(ur => ur.User.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(ur => ur.User.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<RolePermission>()
-            .HasQueryFilter(rp => rp.Role.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(rp => rp.Role.TenantId == _tenantContext.TenantId);
 
         modelBuilder.Entity<RefreshToken>()
-            .HasQueryFilter(rt => rt.User.TenantId == _currentUser.TenantId);
+            .HasQueryFilter(rt => rt.User.TenantId == _tenantContext.TenantId);
 
 
         base.OnModelCreating(modelBuilder);

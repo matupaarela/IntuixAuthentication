@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-public class CurrentUser : ICurrentUser
+public class CurrentUser : ICurrentUser, ITenantContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private Guid? _tenantIdOverride;

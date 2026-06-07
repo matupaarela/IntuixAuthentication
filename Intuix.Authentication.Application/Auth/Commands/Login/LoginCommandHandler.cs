@@ -15,7 +15,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
     private readonly IRefreshTokenService _refreshService;
 
     private readonly ITenantRepository _tenantRepo;
-    private readonly ICurrentUser _currentUser;
+    private readonly ITenantContext _tenantContext;
 
     public LoginCommandHandler(
         IUserRepository userRepo,
@@ -24,7 +24,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         IJwtProvider jwtProvider,
         IRefreshTokenService refreshService,
         ITenantRepository tenantRepository,
-        ICurrentUser currentUser)
+        ITenantContext tenantContext)
     {
         _userRepo = userRepo;
         _refreshRepo = refreshRepo;
@@ -32,7 +32,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         _jwtProvider = jwtProvider;
         _refreshService = refreshService;
         _tenantRepo = tenantRepository;
-        _currentUser = currentUser;
+        _tenantContext = tenantContext;
     }
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -43,8 +43,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         if (tenant == null)
             throw new Exception("Invalid tenant");
 
-        // 🔹 1. Setear tenant en contexto (CRÍTICO)
-        _currentUser.SetTenant(tenant.Id);
+        // 🔹 1. Setear tenant en contexto antes de consultar datos multi-tenant
+        _tenantContext.SetTenant(tenant.Id);
 
         // 🔹 2. Buscar usuario (ahora sí funciona el QueryFilter)
         var user = await _userRepo.GetByUsernameAsync(request.Username);
@@ -54,9 +54,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 
         if (user.IsLocked)
             throw new Exception("User locked");
-
-        //var pass = _hasher.Hash(request.Password);
-        //var passToDB = Convert.ToBase64String(pass);
 
         // 🔹 3. Validar password
         var isValid = _hasher.Verify(

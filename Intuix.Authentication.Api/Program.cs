@@ -57,6 +57,9 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Login
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<ITenantContext>(sp =>
+    sp.GetRequiredService<ICurrentUser>() as ITenantContext
+        ?? throw new InvalidOperationException("CurrentUser must implement ITenantContext."));
 
 builder.Services.AddAuthorization();
 

@@ -222,7 +222,7 @@ public class DeviceManagementTests
         }
     }
 
-    private sealed class TestCurrentUser : ICurrentUser
+    private sealed class TestCurrentUser : ICurrentUser, ITenantContext
     {
         public TestCurrentUser(Guid tenantId)
         {

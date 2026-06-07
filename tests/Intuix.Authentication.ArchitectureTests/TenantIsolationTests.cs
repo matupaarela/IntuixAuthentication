@@ -9,6 +9,23 @@ namespace Intuix.Authentication.ArchitectureTests;
 
 public class TenantIsolationTests
 {
+    [Fact]
+    public async Task Tenant_context_can_scope_queries_without_authenticated_user()
+    {
+        var tenantA = Guid.NewGuid();
+        var tenantB = Guid.NewGuid();
+
+        var tenantContext = new TestTenantContext();
+        using var scope = CreateScope(tenantContext);
+        await SeedAsync(scope.Context, tenantA, tenantB);
+
+        tenantContext.SetTenant(tenantA);
+
+        Assert.Equal(1, await scope.Context.Users.CountAsync());
+        Assert.Equal(1, await scope.Context.Roles.CountAsync());
+        Assert.Equal(1, await scope.Context.RefreshTokens.CountAsync());
+    }
+
     [Theory]
     [MemberData(nameof(FilteredEntityTypes))]
     public void Filtered_entities_define_query_filters(Type entityType)
@@ -254,16 +271,18 @@ public class TenantIsolationTests
     }
 
     private static Scope CreateScope(Guid tenantId)
+        => CreateScope(new TestCurrentUser(tenantId));
+
+    private static Scope CreateScope(ITenantContext tenantContext)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
 
-        var currentUser = new TestCurrentUser(tenantId);
         var options = new DbContextOptionsBuilder<AuthDbContext>()
             .UseSqlite(connection)
             .Options;
 
-        var context = new AuthDbContext(options, currentUser);
+        var context = new AuthDbContext(options, tenantContext);
         context.Database.EnsureCreated();
 
         return new Scope(context, connection);
@@ -278,7 +297,7 @@ public class TenantIsolationTests
         }
     }
 
-    private sealed class TestCurrentUser : ICurrentUser
+    private sealed class TestCurrentUser : ICurrentUser, ITenantContext
     {
         public TestCurrentUser(Guid tenantId)
         {
@@ -290,6 +309,16 @@ public class TenantIsolationTests
         public Guid CompanyId { get; private set; } = Guid.NewGuid();
         public Guid RefreshTokenId { get; private set; } = Guid.NewGuid();
         public bool IsAuthenticated { get; private set; } = true;
+
+        public void SetTenant(Guid tenantId)
+        {
+            TenantId = tenantId;
+        }
+    }
+
+    private sealed class TestTenantContext : ITenantContext
+    {
+        public Guid TenantId { get; private set; }
 
         public void SetTenant(Guid tenantId)
         {
