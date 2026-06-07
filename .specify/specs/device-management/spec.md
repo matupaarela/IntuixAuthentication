@@ -38,12 +38,12 @@ Currently, refresh tokens capture IP and User-Agent but there is no way for user
 
 ## Acceptance Criteria
 
-- [ ] GET /api/devices returns list of active sessions
-- [ ] Each session shows IP, User-Agent, created date
-- [ ] DELETE /api/devices/{tokenId} revokes specific session
-- [ ] POST /api/devices/revoke-all revokes all except current
-- [ ] Current session is not included in revoke-all
-- [ ] Revoked sessions disappear from list
+- [X] GET /api/devices returns list of active sessions
+- [X] Each session shows IP, User-Agent, created date
+- [X] DELETE /api/devices/{tokenId} revokes specific session
+- [X] POST /api/devices/revoke-all revokes all except current
+- [X] Current session is not included in revoke-all
+- [X] Revoked sessions disappear from list
 
 ## API Contract
 

@@ -288,6 +288,7 @@ public class TenantIsolationTests
         public Guid UserId { get; private set; } = Guid.NewGuid();
         public Guid TenantId { get; private set; }
         public Guid CompanyId { get; private set; } = Guid.NewGuid();
+        public Guid RefreshTokenId { get; private set; } = Guid.NewGuid();
         public bool IsAuthenticated { get; private set; } = true;
 
         public void SetTenant(Guid tenantId)

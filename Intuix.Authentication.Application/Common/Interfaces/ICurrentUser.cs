@@ -5,6 +5,7 @@ public interface ICurrentUser
     Guid UserId { get; }
     Guid TenantId { get; }
     Guid CompanyId { get; }
+    Guid RefreshTokenId { get; }
 
     bool IsAuthenticated { get; }
 

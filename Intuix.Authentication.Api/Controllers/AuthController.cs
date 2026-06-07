@@ -28,8 +28,10 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
     {
+        var (ipAddress, userAgent) = GetClientInfo();
+
         var result = await _mediator.Send(
-            new LoginCommand(request.Username, request.Password, request.TenantCode));
+            new LoginCommand(request.Username, request.Password, request.TenantCode, ipAddress, userAgent));
 
         return Ok(result);
     }
@@ -39,8 +41,10 @@ public class AuthController : ControllerBase
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResponse>> Refresh(RefreshTokenRequest request)
     {
+        var (ipAddress, userAgent) = GetClientInfo();
+
         var result = await _mediator.Send(
-            new RefreshTokenCommand(request.RefreshToken));
+            new RefreshTokenCommand(request.RefreshToken, ipAddress, userAgent));
 
         return Ok(result);
     }
@@ -89,5 +93,18 @@ public class AuthController : ControllerBase
             new SwitchCompanyCommand(request.CompanyId));
 
         return Ok(result);
+    }
+
+    private (string? IpAddress, string? UserAgent) GetClientInfo()
+    {
+        var context = HttpContext;
+        var connection = context?.Connection;
+        var request = context?.Request;
+        var ipAddress = connection?.RemoteIpAddress?.ToString();
+        var userAgent = request?.Headers["User-Agent"].ToString();
+
+        return (
+            string.IsNullOrWhiteSpace(ipAddress) ? null : ipAddress,
+            string.IsNullOrWhiteSpace(userAgent) ? null : userAgent);
     }
 }

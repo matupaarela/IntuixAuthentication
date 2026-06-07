@@ -3,4 +3,7 @@ using MediatR;
 
 namespace Intuix.Authentication.Application.Auth.Commands.RefreshToken;
 
-public record RefreshTokenCommand(string RefreshToken) : IRequest<AuthResponse>;
+public record RefreshTokenCommand(
+    string RefreshToken,
+    string? IpAddress = null,
+    string? UserAgent = null) : IRequest<AuthResponse>;

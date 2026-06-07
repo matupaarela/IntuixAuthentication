@@ -37,7 +37,7 @@ public class SwitchCompanyCommandHandler
         var user = await _userRepo.GetByIdAsync(_currentUser.UserId)
             ?? throw new Exception("User not found");
 
-        var token = _jwtProvider.GenerateToken(user, request.CompanyId, roles, permissions);
+        var token = _jwtProvider.GenerateToken(user, request.CompanyId, _currentUser.RefreshTokenId, roles, permissions);
 
         return new AuthResponse
         {

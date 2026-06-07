@@ -71,7 +71,9 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
             TokenHash = newHash,
             ExpiresAt = DateTime.UtcNow.AddDays(7),
             CreatedAt = DateTime.UtcNow,
-            ReplacedByToken = null
+            ReplacedByToken = null,
+            IpAddress = request.IpAddress,
+            UserAgent = request.UserAgent
         };
 
         existingToken.ReplacedByToken = newRefresh.Id;
@@ -80,7 +82,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         await _refreshRepo.SaveChangesAsync();
 
         // 5. Nuevo JWT
-        var accessToken = _jwtProvider.GenerateToken(user, companyId, roles, permissions);
+        var accessToken = _jwtProvider.GenerateToken(user, companyId, newRefresh.Id, roles, permissions);
 
         return new AuthResponse
         {

@@ -35,6 +35,9 @@ public class CurrentUser : ICurrentUser
     public Guid CompanyId =>
         GetGuidClaim("company");
 
+    public Guid RefreshTokenId =>
+        GetGuidClaim("sid");
+
     public bool IsAuthenticated =>
         User?.Identity?.IsAuthenticated ?? false;
 

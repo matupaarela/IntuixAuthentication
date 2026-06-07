@@ -4,14 +4,14 @@
 
 ### Task 1: Create Device DTOs
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Application/Devices/DTOs/DeviceSessionResponse.cs`
 - **Changes:** TokenId, IpAddress, UserAgent, CreatedAt, IsCurrent
 - **Validation:** DTO compiles
 
 ### Task 2: Extend IRefreshTokenRepository
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Application/Auth/Interfaces/IRefreshTokenRepository.cs`
 - **Changes:**
   - `GetActiveSessionsByUserAsync(Guid userId)`
@@ -21,35 +21,35 @@
 
 ### Task 3: Implement Repository Methods
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Infrastructure/Persistence/Repositories/RefreshTokenRepository.cs`
 - **Changes:** Implement all new methods
 - **Validation:** Methods work
 
 ### Task 4: Create DeviceGetListQuery and Handler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:** `Application/Devices/Queries/`
 - **Changes:** Return active sessions with device info
 - **Validation:** Query works
 
 ### Task 5: Create DeviceRevokeSessionCommand and Handler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:** `Application/Devices/Commands/`
 - **Changes:** Revoke specific session, validate ownership
 - **Validation:** Session revoked
 
 ### Task 6: Create DeviceRevokeAllSessionsCommand and Handler
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **Files:** `Application/Devices/Commands/`
 - **Changes:** Revoke all except current session
 - **Validation:** All other sessions revoked
 
 ### Task 7: Create DevicesController
 - **Priority:** High
-- **Status:** Pending
+- **Status:** Completed
 - **File:** `Api/Controllers/DevicesController.cs`
 - **Changes:** GET, DELETE, POST endpoints with `[Authorize]`
 - **Validation:** Endpoints work
@@ -79,10 +79,10 @@
 
 ## Validation Checkpoints
 
-- [ ] Session list works
-- [ ] Specific session revocation works
-- [ ] Revoke-all works
-- [ ] Current session preserved
-- [ ] User can only see own sessions
+- [X] Session list works
+- [X] Specific session revocation works
+- [X] Revoke-all works
+- [X] Current session preserved
+- [X] User can only see own sessions
 - [ ] All unit tests pass
 - [ ] All integration tests pass

@@ -7,10 +7,12 @@ using Intuix.Authentication.Infrastructure.Persistence;
 using Intuix.Authentication.Infrastructure.Persistence.Repositories;
 using Intuix.Authentication.Infrastructure.Security;
 using Intuix.Authentication.Infrastructure.Security.Authorization;
+using Intuix.Authentication.Api.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
@@ -42,7 +44,7 @@ builder.Services
                 Encoding.UTF8.GetBytes(key!)
             ),
 
-            ClockSkew = TimeSpan.Zero // importante para expiración exacta
+            ClockSkew = TimeSpan.Zero // importante para expiraciï¿½n exacta
         };
     });
 
@@ -84,7 +86,20 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by a space and your JWT token."
+    });
+
+    options.OperationFilter<AuthorizeOperationFilter>();
+});
 
 var app = builder.Build();
 
