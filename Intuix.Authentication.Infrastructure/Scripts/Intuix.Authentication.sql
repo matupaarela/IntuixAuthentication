@@ -202,7 +202,7 @@ VALUES
 (NEWID(), @TenantQuipu,  'vendedor', 'ventas@quipu.com', 'AQAAAAIAAYagAAAAEOD+KOXvhRMAJZJrbMBl656aZemgPg2SV6nu5m9ffW6cdczB/Gph1p+cY21kIc9adA=='), -- Venta123!
 (NEWID(), @TenantQuipu,  'cajero', 'caja@quipu.com', 'AQAAAAIAAYagAAAAEPJwzdRSAH5B8d2UvtjXY3Lxw2mVh0KFtuXnAZd54S1X3gN7uKKGxI4NktViB6hIVw=='); -- Caja123!
 
-select * from auth_users
+
 
 -- =========================================
 -- USER - ROLES
