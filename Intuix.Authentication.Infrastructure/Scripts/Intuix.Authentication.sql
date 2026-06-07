@@ -197,7 +197,7 @@ WHERE r.name = 'Administrador';
 -- =========================================
 INSERT INTO auth_users (id, tenant_id, username, email, password_hash)
 VALUES
-(NEWID(), @TenantIntuix, 'admin', 'admin@intuix.com', 'AQAAAAIAAYagAAAAEJUAlRE81Nv30wZm1N35JUuNQZSy0TBfO6MkRF4tnCV2CcJnXKsWrq+6yjs4VaZ8sQ=='), -- Admin123!
+(NEWID(), @TenantIntuix, 'admin', 'admin@intuix.com', '08YPyTYyAQ3kvxCZzItwWZim0chnkP317wLiOtRqo7p2iGFILB4T0YuWfH+4wt20'), -- Admin123!
 (NEWID(), @TenantIntuix, 'dev1', 'dev1@intuix.com', 'AQAAAAIAAYagAAAAEGI894JmlYzvynitg1Fmdm+FTJJE3LV5SexKICqsBAXWutci9MXHUjFrsGPO3nULng=='), -- Dev123!
 (NEWID(), @TenantQuipu,  'vendedor', 'ventas@quipu.com', 'AQAAAAIAAYagAAAAEOD+KOXvhRMAJZJrbMBl656aZemgPg2SV6nu5m9ffW6cdczB/Gph1p+cY21kIc9adA=='), -- Venta123!
 (NEWID(), @TenantQuipu,  'cajero', 'caja@quipu.com', 'AQAAAAIAAYagAAAAEPJwzdRSAH5B8d2UvtjXY3Lxw2mVh0KFtuXnAZd54S1X3gN7uKKGxI4NktViB6hIVw=='); -- Caja123!
