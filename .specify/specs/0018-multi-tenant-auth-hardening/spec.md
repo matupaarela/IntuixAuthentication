@@ -14,6 +14,14 @@ Intuix.Authentication is the trust boundary for the Intuix ecosystem. It authent
 
 This feature hardens the existing authentication surface without expanding into new product modules.
 
+## Clarifications
+
+### Session 2026-07-02
+
+- Q: Should locked accounts unlock automatically or require support intervention? → A: Manual release by support/operations only.
+- Q: Should switch-company return only an access token or the full auth envelope? → A: Full auth envelope.
+- Q: Is `lastUsedAt` required, exposed in `/api/devices`, and updated on each successful refresh-token exchange? → A: Yes.
+
 ## Problem Statement
 
 The platform works on the happy path, but several failure paths still allow inconsistent security behavior or unclear user outcomes. In a shared multi-tenant environment, that creates risk of account lockouts not taking effect, stale sessions surviving reuse, users selecting companies they should not access, and protected endpoints relying on incomplete enforcement.
@@ -44,7 +52,7 @@ The service needs a complete, testable contract for safe authentication and tena
 
 ### User Story 1 - Secure Sign-In and Lockout (Priority: P1)
 
-A tenant user signs in with a username, password, and tenant code. Successful sign-in returns a new session, while repeated failures lock the account until it is released by an operational process.
+A tenant user signs in with a username, password, and tenant code. Successful sign-in returns a new session, while repeated failures lock the account until it is released manually by support/operations.
 
 **Why this priority**: Sign-in is the entry point for all other capabilities, and lockout behavior is a core security control.
 
@@ -100,7 +108,7 @@ A user who belongs to more than one company can switch context, inspect active s
 
 **Acceptance Scenarios**:
 
-1. **Given** a user assigned to multiple companies in one tenant, **When** they switch companies, **Then** a new access token is issued for the selected company.
+1. **Given** a user assigned to multiple companies in one tenant, **When** they switch companies, **Then** the standard auth response envelope is returned with the selected company context, a new access token, and an empty refresh token field.
 2. **Given** a company not assigned to the user or outside the tenant, **When** it is selected, **Then** the request is rejected.
 3. **Given** multiple active sessions, **When** the user lists sessions, **Then** they see each session with device metadata and the current session is marked.
 4. **Given** a specific session, **When** the user revokes it, **Then** only that session is removed.
@@ -124,7 +132,7 @@ A user who belongs to more than one company can switch context, inspect active s
 - **FR-002**: The system must resolve the tenant before looking up the user.
 - **FR-003**: The system must reject unknown or inactive tenants.
 - **FR-004**: The system must reject inactive or locked users.
-- **FR-005**: The system must track consecutive failed sign-in attempts and lock the account after the configured threshold.
+- **FR-005**: The system must track consecutive failed sign-in attempts and lock the account after the configured threshold; locked accounts must remain locked until support/operations manually release them.
 - **FR-006**: The system must reset the failure counter after a successful sign-in.
 - **FR-007**: The system must update the user's last successful login time after a successful sign-in.
 - **FR-008**: The system must return a signed access token and a refresh token on successful sign-in.
@@ -144,7 +152,11 @@ A user who belongs to more than one company can switch context, inspect active s
 - **FR-022**: The system must return generic error messages for invalid tenants, invalid credentials, expired sessions, unauthorized company selection, and reused tokens.
 - **FR-023**: The system must capture session metadata needed for user visibility and revocation decisions, including IP and user agent where available.
 - **FR-024**: The system must preserve token and session history needed to trace rotation and revocation chains.
-- **FR-025**: The system must record security-relevant outcomes without exposing credentials, secrets, or token values.
+- **FR-025**: The system must record security-relevant outcomes with tenant and session context without exposing credentials, secrets, or token values.
+- **FR-026**: The system must update the session `lastUsedAt` value on each successful refresh-token exchange and expose it in active-session listings.
+- **FR-027**: The system must return the standard auth response envelope on successful company switch, including the selected company context, a new access token, and an empty refresh-token field.
+- **FR-028**: The system must validate authentication and session inputs before applying persistence or state changes.
+- **FR-029**: The system must produce structured logs for sign-in, refresh, company switch, and revocation flows with correlation to tenant and session context.
 
 ### Non-Functional Requirements
 
@@ -216,7 +228,7 @@ Response on success: confirmation that all sessions for the current user were re
 
 Request fields: companyId.
 
-Response on success: a new access token for the selected company context.
+Response on success: the standard auth response envelope with the selected company context, a new access token, and an empty refresh-token field.
 
 Failure response: generic unauthorized-company error.
 
@@ -235,7 +247,7 @@ Response on success: confirmation that all other sessions were revoked.
 ### Database Impact
 
 - Existing user records must persist failed-attempt state, lock state, and last successful login time reliably.
-- Existing refresh-session records must persist rotation history, revocation state, and device metadata reliably.
+- Existing refresh-session records must persist rotation history, revocation state, device metadata, and `lastUsedAt` reliably.
 - Existing company membership data must continue to support default-company and allowed-company checks.
 - Lookup performance must be supported by stable indexes for tenant code, username, membership checks, and active sessions.
 - No new top-level identity tables are required for this phase.
@@ -254,7 +266,7 @@ Response on success: confirmation that all other sessions were revoked.
 ### Risks
 
 1. Stricter checks may expose existing data-quality issues in memberships or default-company assignments.
-2. Lockout behavior may increase support contacts if there is no clear operational unlock path.
+2. Lockout behavior may increase support contacts if there is no clear manual unlock path.
 3. Reuse detection may force users to re-authenticate when older clients retry with stale tokens.
 4. Endpoint permission enforcement may temporarily block workflows that were previously allowed implicitly.
 5. Session hardening may require client updates to handle generic failures and forced re-authentication.
@@ -263,7 +275,7 @@ Response on success: confirmation that all other sessions were revoked.
 
 - Existing tenant, company, role, permission, and membership data.
 - Signed access-token configuration and session-expiry settings.
-- An operational path to unlock users and maintain company memberships.
+- An operational path to manually unlock users and maintain company memberships.
 - Client applications that can handle refresh rotation and generic security failures.
 - Regression coverage for tenant boundaries and session management.
 
