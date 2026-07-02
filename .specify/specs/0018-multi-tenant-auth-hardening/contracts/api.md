@@ -39,6 +39,8 @@
 }
 ```
 
+`refreshToken` is required and must be non-empty.
+
 ### Success Response
 
 ```json
@@ -54,7 +56,7 @@
 
 ### Failure Response
 
-- Generic session error for expired, revoked, malformed, or reused tokens
+- Generic session error for missing, malformed, expired, revoked, or reused tokens
 
 ## POST /auth/logout
 
@@ -100,11 +102,13 @@ Uses the auth response envelope with a new access token, the current user/tenant
 
 ### Failure Response
 
-- Generic unauthorized-company error
+- Generic unauthorized-company error for inactive companies, inactive organizations, cross-tenant requests, or missing membership
 
 ## GET /api/devices
 
 ### Success Response
+
+The response contains the current user's active device sessions, including device metadata and current-session status.
 
 ```json
 {
@@ -120,6 +124,8 @@ Uses the auth response envelope with a new access token, the current user/tenant
   ]
 }
 ```
+
+Legacy active rows are backfilled from `CreatedAt` during migration, so `lastUsedAt` is always present for active sessions.
 
 ## DELETE /api/devices/{tokenId}
 

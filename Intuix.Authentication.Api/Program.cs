@@ -115,11 +115,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 app.UseAuthentication();
 
-app.UseAuthorization();
-
 app.UseMiddleware<TenantMiddleware>();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

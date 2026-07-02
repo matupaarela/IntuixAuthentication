@@ -24,7 +24,7 @@ namespace Intuix.Authentication.Application.Auth.Commands.Logout
         public async Task<Unit> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
             var hash = _refreshTokenService.Hash(request.RefreshToken);
-            var token = await _repo.GetByHashAsync(hash);
+            var token = await _repo.GetByHashAsync(hash, cancellationToken);
 
             if (token == null)
             {
@@ -35,7 +35,8 @@ namespace Intuix.Authentication.Application.Auth.Commands.Logout
             await _repo.RevokeTokenChainAsync(
                 token.Id,
                 "User logout",
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                cancellationToken);
 
             _logger.LogInformation(
                 "Logout revoked refresh token chain for user {UserId}",

@@ -17,7 +17,7 @@ public class DeviceRevokeSessionCommandHandler : IRequestHandler<DeviceRevokeSes
 
     public async Task<Unit> Handle(DeviceRevokeSessionCommand request, CancellationToken cancellationToken)
     {
-        await _repo.RevokeSessionAsync(request.TokenId, _currentUser.UserId);
+        await _repo.RevokeSessionAsync(request.TokenId, _currentUser.UserId, cancellationToken);
         return Unit.Value;
     }
 }

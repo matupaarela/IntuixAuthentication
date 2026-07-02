@@ -1,9 +1,9 @@
 ﻿using Intuix.Authentication.Application.Auth.DTOs;
 using Intuix.Authentication.Application.Auth.Interfaces;
+using Intuix.Authentication.Application.Common.Interfaces;
 using Intuix.Authentication.Domain.Interfaces;
 using MediatR;
-using System.Security.Cryptography;
-using System.Text;
+
 namespace Intuix.Authentication.Application.Auth.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResponse>
@@ -12,83 +12,91 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
     private readonly IUserRepository _userRepo;
     private readonly IJwtProvider _jwtProvider;
     private readonly IRefreshTokenService _refreshService;
+    private readonly ITenantContext _tenantContext;
 
     public RefreshTokenCommandHandler(
         IRefreshTokenRepository refreshRepo,
         IUserRepository userRepo,
         IJwtProvider jwtProvider,
-        IRefreshTokenService refreshService)
+        IRefreshTokenService refreshService,
+        ITenantContext tenantContext)
     {
         _refreshRepo = refreshRepo;
         _userRepo = userRepo;
         _jwtProvider = jwtProvider;
         _refreshService = refreshService;
+        _tenantContext = tenantContext;
     }
 
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        // 1. Hash del token recibido
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(request.RefreshToken));
+        var now = DateTime.UtcNow;
+        var hash = _refreshService.Hash(request.RefreshToken);
 
-        var existingToken = await _refreshRepo.GetByHashAsync(hash);
+        var existingToken = await _refreshRepo.GetByHashAsync(hash, cancellationToken);
 
-        if (existingToken == null)
-            throw new Exception("Invalid refresh token");
+        if (existingToken == null || existingToken.User == null || !existingToken.User.IsActive || existingToken.User.IsLocked)
+            throw new InvalidOperationException("Security validation failed.");
 
-        // 2. Validaciones críticas
+        if (existingToken.User.TenantId == Guid.Empty)
+            throw new InvalidOperationException("Security validation failed.");
+
+        _tenantContext.SetTenant(existingToken.User.TenantId);
+
         if (existingToken.RevokedAt != null)
         {
-            // 🔥 TOKEN REUTILIZADO → ataque
-            // aquí podrías revocar toda la cadena (opcional)
-            throw new Exception("Token already revoked (possible reuse attack)");
+            await _refreshRepo.RevokeTokenChainAsync(
+                existingToken.Id,
+                "Refresh token reused",
+                now,
+                cancellationToken);
+
+            throw new InvalidOperationException("Security validation failed.");
         }
 
-        if (existingToken.ExpiresAt < DateTime.UtcNow)
-            throw new Exception("Token expired");
+        if (existingToken.ExpiresAt <= now)
+            throw new InvalidOperationException("Security validation failed.");
 
         var user = existingToken.User;
 
-        if (user == null || !user.IsActive)
-            throw new Exception("Invalid user");
+        var companyId = await _userRepo.GetDefaultCompanyAsync(user.Id, cancellationToken)
+            ?? throw new InvalidOperationException("Security validation failed.");
 
-        // 3. Obtener contexto
-        var companyId = await _userRepo.GetDefaultCompanyAsync(user.Id)
-            ?? throw new Exception("User has no company");
+        var roles = await _userRepo.GetRolesAsync(user.Id, cancellationToken);
+        var permissions = await _userRepo.GetPermissionsAsync(user.Id, cancellationToken);
 
-        var roles = await _userRepo.GetRolesAsync(user.Id);
-        var permissions = await _userRepo.GetPermissionsAsync(user.Id);
-
-        // 4. ROTACIÓN
         var (newToken, newHash) = _refreshService.Generate();
+        var newRefreshId = Guid.NewGuid();
 
-        // revocar actual
-        existingToken.RevokedAt = DateTime.UtcNow;
+        existingToken.RevokedAt = now;
+        existingToken.ReplacedByToken = newRefreshId;
+        existingToken.RevocationReason = "Refresh token rotated";
+        existingToken.LastUsedAt = now;
 
         var newRefresh = new Domain.Entities.RefreshToken
         {
-            Id = Guid.NewGuid(),
+            Id = newRefreshId,
             UserId = user.Id,
             TokenHash = newHash,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            CreatedAt = DateTime.UtcNow,
-            ReplacedByToken = null,
+            ExpiresAt = now.AddDays(7),
+            CreatedAt = now,
+            LastUsedAt = now,
             IpAddress = request.IpAddress,
-            UserAgent = request.UserAgent
+            UserAgent = request.UserAgent,
+            Device = request.UserAgent
         };
 
-        existingToken.ReplacedByToken = newRefresh.Id;
+        await _refreshRepo.AddAsync(newRefresh, cancellationToken);
 
-        await _refreshRepo.AddAsync(newRefresh);
-        await _refreshRepo.SaveChangesAsync();
-
-        // 5. Nuevo JWT
         var accessToken = _jwtProvider.GenerateToken(user, companyId, newRefresh.Id, roles, permissions);
+
+        await _refreshRepo.SaveChangesAsync(cancellationToken);
 
         return new AuthResponse
         {
             AccessToken = accessToken,
             RefreshToken = newToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            ExpiresAt = now.AddMinutes(15),
 
             UserId = user.Id,
             TenantId = user.TenantId,

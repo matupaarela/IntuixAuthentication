@@ -13,9 +13,9 @@ namespace Intuix.Authentication.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<Tenant?> GetByCodeAsync(string code)
+        public async Task<Tenant?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
         {
-            return await _context.Tenants.FirstOrDefaultAsync(t => t.Code.ToLower() == code.ToLower());
+            return await _context.Tenants.FirstOrDefaultAsync(t => t.Code == code, cancellationToken);
         }
     }
 }

@@ -11,6 +11,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.ToTable("auth_refresh_tokens");
 
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+        builder.Property(x => x.LastUsedAt).HasColumnName("last_used_at");
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.UserId).HasColumnName("user_id");
         builder.Property(x => x.TokenHash).HasColumnName("token_hash");
@@ -31,7 +32,11 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.Property(x => x.ExpiresAt)
             .IsRequired();
 
+        builder.Property(x => x.LastUsedAt)
+            .IsRequired();
+
         builder.HasIndex(x => x.UserId);
+        builder.HasIndex(x => new { x.UserId, x.RevokedAt, x.LastUsedAt });
 
         builder.HasOne(x => x.User)
             .WithMany()

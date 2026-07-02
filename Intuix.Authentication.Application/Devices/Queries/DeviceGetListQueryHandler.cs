@@ -19,7 +19,7 @@ public class DeviceGetListQueryHandler : IRequestHandler<DeviceGetListQuery, Lis
 
     public async Task<List<DeviceSessionResponse>> Handle(DeviceGetListQuery request, CancellationToken cancellationToken)
     {
-        var sessions = await _repo.GetActiveSessionsByUserAsync(_currentUser.UserId);
+        var sessions = await _repo.GetActiveSessionsByUserAsync(_currentUser.UserId, cancellationToken);
         var currentTokenId = ResolveCurrentTokenId(sessions);
 
         return sessions
@@ -29,7 +29,7 @@ public class DeviceGetListQueryHandler : IRequestHandler<DeviceGetListQuery, Lis
                 IpAddress = x.IpAddress,
                 UserAgent = x.UserAgent,
                 CreatedAt = x.CreatedAt,
-                LastUsedAt = x.CreatedAt,
+                LastUsedAt = x.LastUsedAt == default ? x.CreatedAt : x.LastUsedAt,
                 IsCurrent = x.Id == currentTokenId
             })
             .ToList();

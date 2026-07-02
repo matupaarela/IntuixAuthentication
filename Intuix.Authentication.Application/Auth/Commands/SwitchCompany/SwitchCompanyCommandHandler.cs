@@ -25,17 +25,19 @@ public class SwitchCompanyCommandHandler
 
     public async Task<AuthResponse> Handle(SwitchCompanyCommand request, CancellationToken cancellationToken)
     {
-        // validar que la empresa pertenece al usuario
-        var companies = await _userRepo.GetUserCompaniesAsync(_currentUser.UserId);
+        if (_currentUser.UserId == Guid.Empty || _currentUser.RefreshTokenId == Guid.Empty)
+            throw new InvalidOperationException("Security validation failed.");
+
+        var companies = await _userRepo.GetUserCompaniesAsync(_currentUser.UserId, cancellationToken);
 
         if (!companies.Contains(request.CompanyId))
-            throw new Exception("Unauthorized company");
+            throw new UnauthorizedAccessException("Unauthorized company.");
 
-        var roles = await _userRepo.GetRolesAsync(_currentUser.UserId);
-        var permissions = await _userRepo.GetPermissionsAsync(_currentUser.UserId);
+        var roles = await _userRepo.GetRolesAsync(_currentUser.UserId, cancellationToken);
+        var permissions = await _userRepo.GetPermissionsAsync(_currentUser.UserId, cancellationToken);
 
-        var user = await _userRepo.GetByIdAsync(_currentUser.UserId)
-            ?? throw new Exception("User not found");
+        var user = await _userRepo.GetByIdAsync(_currentUser.UserId, cancellationToken)
+            ?? throw new InvalidOperationException("Security validation failed.");
 
         var token = _jwtProvider.GenerateToken(user, request.CompanyId, _currentUser.RefreshTokenId, roles, permissions);
 

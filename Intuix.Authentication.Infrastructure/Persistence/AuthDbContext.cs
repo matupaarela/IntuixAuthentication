@@ -27,6 +27,10 @@ public class AuthDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        if (Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            modelBuilder.UseCollation("NOCASE");
+        }
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuthDbContext).Assembly);
         //modelBuilder.ApplyConfiguration(new TenantConfiguration());

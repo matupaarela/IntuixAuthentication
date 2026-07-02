@@ -80,7 +80,7 @@
 - `IpAddress` (optional)
 - `UserAgent` (optional)
 - `RevocationReason` (optional)
-- `LastUsedAt` (planned)
+- `LastUsedAt` (required)
 
 ## Relationships
 
@@ -101,6 +101,7 @@
 - A default company must be one of the user's assigned companies.
 - A refresh token must always be associated with one user.
 - A revoked token must not be accepted for renewal.
+- Existing active refresh-token rows must be backfilled from `CreatedAt` so `LastUsedAt` is never null for active sessions.
 
 ## State Transitions
 
@@ -120,4 +121,4 @@
 - `Tenant.Code` should remain indexed and unique.
 - `(TenantId, Username)` should remain indexed and unique.
 - `UserId` on refresh tokens should remain indexed.
-- Active-session queries should be able to filter by `UserId`, `RevokedAt`, and `CreatedAt` efficiently.
+- Active-session queries should be able to filter by `UserId`, `RevokedAt`, `LastUsedAt`, and `CreatedAt` efficiently.

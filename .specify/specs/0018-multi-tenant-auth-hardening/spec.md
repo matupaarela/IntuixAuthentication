@@ -21,6 +21,7 @@ This feature hardens the existing authentication surface without expanding into 
 - Q: Should locked accounts unlock automatically or require support intervention? → A: Manual release by support/operations only.
 - Q: Should switch-company return only an access token or the full auth envelope? → A: Full auth envelope.
 - Q: Is `lastUsedAt` required, exposed in `/api/devices`, and updated on each successful refresh-token exchange? → A: Yes.
+- Q: Should existing locked accounts be auto-unlocked during rollout? → A: No. Existing lock state is preserved and support/operations must release it manually.
 
 ## Problem Statement
 
@@ -100,7 +101,7 @@ Protected endpoints are available only to users who belong to the active tenant 
 
 ### User Story 4 - Company Switching and Session Controls (Priority: P2)
 
-A user who belongs to more than one company can switch context, inspect active sessions, and revoke sessions that belong to their own account.
+A user who belongs to more than one company can switch context, inspect active device sessions, and revoke sessions that belong to their own account.
 
 **Why this priority**: Multi-company users need control over their working context and active sessions, but these actions must remain tenant-safe.
 
@@ -109,8 +110,8 @@ A user who belongs to more than one company can switch context, inspect active s
 **Acceptance Scenarios**:
 
 1. **Given** a user assigned to multiple companies in one tenant, **When** they switch companies, **Then** the standard auth response envelope is returned with the selected company context, a new access token, and an empty refresh token field.
-2. **Given** a company not assigned to the user or outside the tenant, **When** it is selected, **Then** the request is rejected.
-3. **Given** multiple active sessions, **When** the user lists sessions, **Then** they see each session with device metadata and the current session is marked.
+2. **Given** a company not assigned to the user, is inactive, belongs to an inactive organization, or is outside the tenant, **When** it is selected, **Then** the request is rejected.
+3. **Given** multiple active device sessions, **When** the user lists sessions, **Then** they see each session with device metadata and the current session is marked.
 4. **Given** a specific session, **When** the user revokes it, **Then** only that session is removed.
 5. **Given** the current session, **When** the user revokes all others, **Then** the current session remains active.
 
@@ -119,10 +120,13 @@ A user who belongs to more than one company can switch context, inspect active s
 - The tenant code resolves to an inactive tenant.
 - The user is inactive or already locked.
 - The user has no default company assignment.
-- The refresh token is malformed, expired, revoked, or reused after logout.
+- The refresh token is missing, malformed, expired, revoked, or reused after logout.
 - The selected company is active but belongs to another tenant.
+- The selected company is inactive or its parent organization is inactive.
 - Session listing is requested after all sessions have already been revoked.
+- Session history is requested for a legacy row where `lastUsedAt` has not yet been backfilled.
 - A protected operation is attempted without the required permission context.
+- A persistence failure occurs after validation but before commit; the operation fails closed and returns a generic error.
 
 ## Requirements *(mandatory)*
 
@@ -143,20 +147,21 @@ A user who belongs to more than one company can switch context, inspect active s
 - **FR-013**: The system must rotate refresh tokens on each renewal.
 - **FR-014**: The system must revoke the entire related session family when a revoked refresh token is presented again.
 - **FR-015**: The system must support logout for a specific session and logout of all sessions for the current user.
-- **FR-016**: The system must allow a user to list active sessions with device metadata and current-session status.
+- **FR-016**: The system must allow a user to list active device sessions with device metadata and current-session status.
 - **FR-017**: The system must allow a user to revoke a specific active session.
 - **FR-018**: The system must allow a user to revoke all sessions except the current one.
-- **FR-019**: The system must allow company switching only to companies assigned to the user and within the same tenant.
+- **FR-019**: The system must allow company switching only to active companies assigned to the user and within the same tenant; the owning organization must also be active.
 - **FR-020**: The system must deny protected operations when the required permission is missing.
 - **FR-021**: The system must enforce tenant boundaries for all tenant-scoped data and session operations.
-- **FR-022**: The system must return generic error messages for invalid tenants, invalid credentials, expired sessions, unauthorized company selection, and reused tokens.
+- **FR-022**: The system must return generic error messages for invalid tenants, invalid credentials, locked users, missing or malformed refresh tokens, expired sessions, unauthorized company selection, and reused tokens.
 - **FR-023**: The system must capture session metadata needed for user visibility and revocation decisions, including IP and user agent where available.
 - **FR-024**: The system must preserve token and session history needed to trace rotation and revocation chains.
 - **FR-025**: The system must record security-relevant outcomes with tenant and session context without exposing credentials, secrets, or token values.
-- **FR-026**: The system must update the session `lastUsedAt` value on each successful refresh-token exchange and expose it in active-session listings.
+- **FR-026**: The system must update the session `lastUsedAt` value on each successful refresh-token exchange, expose it in active-session listings, and backfill legacy active rows from `CreatedAt` during migration.
 - **FR-027**: The system must return the standard auth response envelope on successful company switch, including the selected company context, a new access token, and an empty refresh-token field.
 - **FR-028**: The system must validate authentication and session inputs before applying persistence or state changes.
-- **FR-029**: The system must produce structured logs for sign-in, refresh, company switch, and revocation flows with correlation to tenant and session context.
+- **FR-029**: The system must produce structured logs for sign-in, refresh, company switch, and revocation flows with correlation to tenant, user, session, and request context.
+- **FR-030**: The system must commit login, refresh, logout, logout-all, company-switch, and session-revocation state changes atomically; if persistence fails, the request must fail closed and no success response may be returned.
 
 ### Non-Functional Requirements
 
@@ -166,6 +171,8 @@ A user who belongs to more than one company can switch context, inspect active s
 - **NFR-004**: 100% of security failures must use generic messages and must not reveal whether a tenant, user, or token exists.
 - **NFR-005**: 100% of protected endpoints must deny access when permission or tenant context is missing or invalid.
 - **NFR-006**: The rollout must not force existing users to re-register or change credentials.
+- **NFR-007**: Transient persistence, logging, or token-store failures must not create partial auth state; retries must remain safe and the service must fail closed with generic errors.
+- **NFR-008**: Auth failure and recovery paths must continue returning generic responses under transient downstream outages without hanging, leaking secrets, or exposing partial session state.
 
 ### Security Requirements
 
@@ -177,6 +184,7 @@ A user who belongs to more than one company can switch context, inspect active s
 6. Sensitive secrets must never be logged or returned to clients.
 7. Permission checks must be enforced consistently at the endpoint boundary.
 8. Security-related events must be traceable by user and session without exposing credentials.
+9. Sign-in failures, lockouts, refresh reuse, company switches, session revocations, and manual unlocks must emit structured operational audit events with tenant, user, session, action, outcome, and correlation context, without credentials, secrets, or token values.
 
 ### Tenant Isolation Requirements
 
@@ -248,6 +256,7 @@ Response on success: confirmation that all other sessions were revoked.
 
 - Existing user records must persist failed-attempt state, lock state, and last successful login time reliably.
 - Existing refresh-session records must persist rotation history, revocation state, device metadata, and `lastUsedAt` reliably.
+- Existing active refresh-session rows must be backfilled so `lastUsedAt` is available before rollout is considered complete.
 - Existing company membership data must continue to support default-company and allowed-company checks.
 - Lookup performance must be supported by stable indexes for tenant code, username, membership checks, and active sessions.
 - No new top-level identity tables are required for this phase.
@@ -262,6 +271,7 @@ Response on success: confirmation that all other sessions were revoked.
 - **Permission**: A capability that can be granted to a role.
 - **User-Company membership**: The allowed-company relationship for a user, including the default company.
 - **Refresh session**: The active session family that can be renewed, rotated, and revoked.
+- **Device session**: The user-facing refresh-session view that includes device metadata, recency, and current-session status.
 
 ### Risks
 
@@ -276,6 +286,7 @@ Response on success: confirmation that all other sessions were revoked.
 - Existing tenant, company, role, permission, and membership data.
 - Signed access-token configuration and session-expiry settings.
 - An operational path to manually unlock users and maintain company memberships.
+- An operational logging sink that can retain structured security and manual-unlock events.
 - Client applications that can handle refresh rotation and generic security failures.
 - Regression coverage for tenant boundaries and session management.
 
@@ -285,15 +296,17 @@ Response on success: confirmation that all other sessions were revoked.
 
 - **SC-001**: 100% of lockout acceptance tests pass, including the configured failure threshold.
 - **SC-002**: 100% of refresh-token reuse acceptance tests revoke the full related session family.
-- **SC-003**: 0 successful cross-tenant access attempts occur in regression and UAT.
+- **SC-003**: 0 successful cross-tenant access attempts occur in regression and UAT for login, refresh, switch-company, and device/session flows.
 - **SC-004**: 95% of sign-in, refresh, company-switch, and session-control actions complete within 2 seconds under expected load.
-- **SC-005**: 90% of pilot users can sign in, switch company, and revoke a session without assistance.
-- **SC-006**: Support tickets related to wrong company context or stale session behavior drop by at least 50% after rollout.
+- **SC-005**: 90% of pilot users in the designated rollout cohort can sign in, switch company, and revoke a session without assistance.
+- **SC-006**: Support tickets related to wrong company context or stale session behavior drop by at least 50% compared with the 30-day pre-launch baseline after rollout.
 
 ## Assumptions
 
 - Existing users will continue using the current sign-in path.
+- Existing locked users remain locked during rollout until manually released; the deployment does not auto-unlock them.
 - Refresh-token revocation ends renewal ability, while the access token expires naturally.
+- Client applications understand refresh-token rotation and generic security failures, and stale refresh tokens may require re-authentication.
 - Users may belong to multiple companies inside one tenant, and one company is the default.
 - Multi-factor authentication, OAuth/SSO, API keys, and audit logging are handled as separate future features.
 - Seed data and existing examples will be updated to stay coherent with the new rules.

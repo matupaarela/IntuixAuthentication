@@ -24,12 +24,13 @@ public class LogoutAllCommandHandler : IRequestHandler<LogoutAllCommand, Unit>
     public async Task<Unit> Handle(LogoutAllCommand request, CancellationToken cancellationToken)
     {
         if (_currentUser.UserId == Guid.Empty)
-            throw new InvalidOperationException("Current user context is required");
+            throw new InvalidOperationException("Security validation failed.");
 
         await _repo.RevokeAllUserTokensAsync(
             _currentUser.UserId,
             "Logout all",
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            cancellationToken);
 
         _logger.LogInformation(
             "Logout-all revoked all refresh tokens for user {UserId}",

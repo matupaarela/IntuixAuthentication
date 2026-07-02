@@ -234,7 +234,8 @@ public class TenantIsolationTests
             UserId = userA.Id,
             TokenHash = new byte[] { 1, 2, 3 },
             ExpiresAt = now.AddDays(7),
-            CreatedAt = now
+            CreatedAt = now,
+            LastUsedAt = now
         };
         refreshTokenA.User = userA;
 
@@ -244,7 +245,8 @@ public class TenantIsolationTests
             UserId = userB.Id,
             TokenHash = new byte[] { 4, 5, 6 },
             ExpiresAt = now.AddDays(7),
-            CreatedAt = now
+            CreatedAt = now,
+            LastUsedAt = now
         };
         refreshTokenB.User = userB;
 

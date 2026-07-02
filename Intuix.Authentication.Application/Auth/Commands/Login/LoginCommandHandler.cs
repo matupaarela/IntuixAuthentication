@@ -37,29 +37,30 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        // 🔹 0. Resolver tenant
-        var tenant = await _tenantRepo.GetByCodeAsync(request.TenantCode);
+        var now = DateTime.UtcNow;
 
-        if (tenant == null)
-            throw new Exception("Invalid tenant");
+        var tenant = await _tenantRepo.GetByCodeAsync(request.TenantCode, cancellationToken);
 
-        // 🔹 1. Setear tenant en contexto antes de consultar datos multi-tenant
+        if (tenant is null || !tenant.IsActive)
+            throw new InvalidOperationException("Authentication failed.");
+
         _tenantContext.SetTenant(tenant.Id);
 
-        // 🔹 2. Buscar usuario (ahora sí funciona el QueryFilter)
-        var user = await _userRepo.GetByUsernameAsync(request.Username);
+        var user = await _userRepo.GetByUsernameAsync(request.Username, cancellationToken);
 
-        if (user == null || !user.IsActive)
-            throw new Exception("Invalid credentials");
+        if (user is null || !user.IsActive || user.IsLocked)
+            throw new InvalidOperationException("Authentication failed.");
 
-        if (user.IsLocked)
-            throw new Exception("User locked");
+        bool isValid;
 
-        // 🔹 3. Validar password
-        var isValid = _hasher.Verify(
-            request.Password,
-            Convert.FromBase64String(user.PasswordHash)
-        );
+        try
+        {
+            isValid = _hasher.Verify(request.Password, Convert.FromBase64String(user.PasswordHash));
+        }
+        catch (FormatException)
+        {
+            isValid = false;
+        }
 
         if (!isValid)
         {
@@ -68,19 +69,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
             if (user.FailedAttempts >= 5)
                 user.IsLocked = true;
 
-            throw new Exception("Invalid credentials");
+            await _userRepo.SaveChangesAsync(cancellationToken);
+            throw new InvalidOperationException("Authentication failed.");
         }
 
+        var companyId = await _userRepo.GetDefaultCompanyAsync(user.Id, cancellationToken);
+
+        if (companyId is null)
+            throw new InvalidOperationException("Authentication failed.");
+
         user.FailedAttempts = 0;
-        user.LastLogin = DateTime.UtcNow;
+        user.LastLogin = now;
 
-        var companyId = await _userRepo.GetDefaultCompanyAsync(user.Id);
-
-        if (companyId == null)
-            throw new Exception("User has no company assigned");
-
-        var roles = await _userRepo.GetRolesAsync(user.Id);
-        var permissions = await _userRepo.GetPermissionsAsync(user.Id);
+        var roles = await _userRepo.GetRolesAsync(user.Id, cancellationToken);
+        var permissions = await _userRepo.GetPermissionsAsync(user.Id, cancellationToken);
 
         var (refreshToken, hash) = _refreshService.Generate();
 
@@ -89,22 +91,24 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
             Id = Guid.NewGuid(),
             UserId = user.Id,
             TokenHash = hash,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = now.AddDays(7),
+            CreatedAt = now,
+            LastUsedAt = now,
             IpAddress = request.IpAddress,
-            UserAgent = request.UserAgent
+            UserAgent = request.UserAgent,
+            Device = request.UserAgent
         };
 
+        await _refreshRepo.AddAsync(refreshEntity);
         var accessToken = _jwtProvider.GenerateToken(user, companyId.Value, refreshEntity.Id, roles, permissions);
 
-        await _refreshRepo.AddAsync(refreshEntity);
-        await _refreshRepo.SaveChangesAsync();
+        await _userRepo.SaveChangesAsync(cancellationToken);
 
         return new AuthResponse
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+            ExpiresAt = now.AddMinutes(15),
 
             UserId = user.Id,
             TenantId = user.TenantId,

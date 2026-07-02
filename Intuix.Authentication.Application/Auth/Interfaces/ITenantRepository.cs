@@ -2,8 +2,8 @@
 
 namespace Intuix.Authentication.Application.Auth.Interfaces
 {
-    public interface ITenantRepository
-    {
-        Task<Tenant?> GetByCodeAsync(string code);
-    }
+public interface ITenantRepository
+{
+    Task<Tenant?> GetByCodeAsync(string code, CancellationToken cancellationToken = default);
+}
 }

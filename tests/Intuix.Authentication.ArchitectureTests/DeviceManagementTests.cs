@@ -26,8 +26,8 @@ public class DeviceManagementTests
         var result = await handler.Handle(new DeviceGetListQuery(), CancellationToken.None);
 
         Assert.Equal(2, result.Count);
-        Assert.Contains(result, x => x.TokenId == scope.CurrentTokenId && x.IsCurrent && x.IpAddress == "10.0.0.1" && x.UserAgent == "UA-A");
-        Assert.Contains(result, x => x.TokenId == scope.SecondTokenId && !x.IsCurrent && x.IpAddress == "10.0.0.2" && x.UserAgent == "UA-B");
+        Assert.Contains(result, x => x.TokenId == scope.CurrentTokenId && x.IsCurrent && x.IpAddress == "10.0.0.1" && x.UserAgent == "UA-A" && x.LastUsedAt == x.CreatedAt);
+        Assert.Contains(result, x => x.TokenId == scope.SecondTokenId && !x.IsCurrent && x.IpAddress == "10.0.0.2" && x.UserAgent == "UA-B" && x.LastUsedAt == x.CreatedAt);
         Assert.DoesNotContain(result, x => x.TokenId == scope.OtherUserTokenId);
     }
 
@@ -172,6 +172,7 @@ public class DeviceManagementTests
             TokenHash = new byte[] { 1, 1, 1 },
             ExpiresAt = now.AddDays(7),
             CreatedAt = now.AddMinutes(-10),
+            LastUsedAt = now.AddMinutes(-10),
             IpAddress = "10.0.0.1",
             UserAgent = "UA-A"
         };
@@ -184,6 +185,7 @@ public class DeviceManagementTests
             TokenHash = new byte[] { 2, 2, 2 },
             ExpiresAt = now.AddDays(7),
             CreatedAt = now.AddMinutes(-5),
+            LastUsedAt = now.AddMinutes(-5),
             IpAddress = "10.0.0.2",
             UserAgent = "UA-B"
         };
@@ -196,6 +198,7 @@ public class DeviceManagementTests
             TokenHash = new byte[] { 3, 3, 3 },
             ExpiresAt = now.AddDays(7),
             CreatedAt = now.AddMinutes(-3),
+            LastUsedAt = now.AddMinutes(-3),
             IpAddress = "10.0.0.3",
             UserAgent = "UA-C"
         };

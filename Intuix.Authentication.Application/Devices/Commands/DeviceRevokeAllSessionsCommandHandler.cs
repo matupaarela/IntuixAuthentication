@@ -21,14 +21,14 @@ public class DeviceRevokeAllSessionsCommandHandler : IRequestHandler<DeviceRevok
 
         if (currentTokenId == Guid.Empty)
         {
-            var sessions = await _repo.GetActiveSessionsByUserAsync(_currentUser.UserId);
+            var sessions = await _repo.GetActiveSessionsByUserAsync(_currentUser.UserId, cancellationToken);
             currentTokenId = sessions
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => x.Id)
                 .FirstOrDefault();
         }
 
-        await _repo.RevokeAllSessionsExceptCurrentAsync(_currentUser.UserId, currentTokenId);
+        await _repo.RevokeAllSessionsExceptCurrentAsync(_currentUser.UserId, currentTokenId, cancellationToken);
         return Unit.Value;
     }
 }

@@ -20,7 +20,7 @@ Harden the auth surface by making lockout durable, revoking refresh families on 
 
 **Validation**: FluentValidation validators for auth and session inputs
 
-**Observability**: Structured security logging with tenant and session correlation
+**Observability**: Structured security logging with tenant and session correlation, plus manual-unlock audit events
 
 **Target Platform**: Server-side web service (`Intuix.Authentication.Api`)
 
@@ -41,6 +41,15 @@ Harden the auth surface by making lockout durable, revoking refresh families on 
 - Security, tenant isolation, and sensitive-data handling are explicitly addressed.
 - Required tests, validators, migrations, logging, and documentation impacts are identified.
 - A controlled `IgnoreQueryFilters()` refresh-token lookup is documented as a deviation and must be revalidated against the owning user before issuance.
+
+## Migration and Rollout Strategy
+
+- `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql` is the checked-in baseline schema for fresh installs.
+- `Intuix.Authentication.Infrastructure/Migrations/` holds forward-only EF Core changes layered on top of that baseline.
+- The feature migration is additive: backfill `LastUsedAt`, align session indexes, and avoid destructive schema changes.
+- Rollout order is schema first, application second, then backfill/verification; success is not declared until the active-session data is populated.
+- Rollback is application-first: revert the API/application binaries if needed and keep the additive schema in place so older binaries continue to run safely.
+- The only tolerated query-filter bypass is refresh-token lookup before tenant context exists, and ownership must be revalidated before issuance or revocation.
 
 ## Project Structure
 

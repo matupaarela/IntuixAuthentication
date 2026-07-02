@@ -19,7 +19,7 @@ CREATE TABLE auth_tenants (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     name NVARCHAR(150) NOT NULL,
     code NVARCHAR(50) NOT NULL UNIQUE,
-    is_active BIT NOT NULL DEFAULT 1,
+    is_active BIT NOT NULL DEFAULT 1
 );
 
 CREATE TABLE auth_organizations (
@@ -112,6 +112,7 @@ CREATE TABLE auth_refresh_tokens (
 
     token_hash VARBINARY(512) NOT NULL,
     expires_at DATETIME2 NOT NULL,
+    last_used_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 
     revoked_at DATETIME2 NULL,
 
@@ -121,6 +122,9 @@ CREATE TABLE auth_refresh_tokens (
 
     FOREIGN KEY (user_id) REFERENCES auth_users(id)
 );
+
+CREATE INDEX IX_auth_refresh_tokens_user_id_revoked_at_last_used_at
+    ON auth_refresh_tokens (user_id, revoked_at, last_used_at);
 
 ALTER TABLE auth_refresh_tokens ADD device VARCHAR(100);
 ALTER TABLE auth_refresh_tokens ADD revocation_reason VARCHAR(250);
@@ -232,4 +236,4 @@ WHERE u.username IN ('admin', 'vendedor', 'cajero');
 
 
 
-ROLLBACK
+COMMIT
