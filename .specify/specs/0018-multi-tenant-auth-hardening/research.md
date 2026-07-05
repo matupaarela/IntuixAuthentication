@@ -52,6 +52,12 @@
 - Rationale: device/session views need a stable current-session signal and explicit last-use tracking.
 - Alternatives considered: separate session table, infer current session from the latest active token.
 
+### Manual-unlock audit ownership
+
+- Decision: support/operations tooling owns manual unlock actions and emits the matching structured audit event; the auth service does not expose a public unlock endpoint.
+- Rationale: keeps the operational path explicit without broadening the auth API surface.
+- Alternatives considered: public manual-unlock endpoint, internal support command inside the auth service.
+
 ## Constitution Notes
 
 - One controlled deviation is documented in the plan: `IgnoreQueryFilters()` for refresh-token lookup before tenant context exists.

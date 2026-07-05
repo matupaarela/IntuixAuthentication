@@ -1,3 +1,4 @@
+using Intuix.Authentication.Application.Common.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Intuix.Authentication.Api.Middleware;
@@ -13,7 +14,7 @@ public sealed class ExceptionHandlingMiddleware
         _logger = logger;
     }
 
-    public async Task Invoke(HttpContext context)
+    public async Task Invoke(HttpContext context, ICurrentUser currentUser)
     {
         try
         {
@@ -26,7 +27,14 @@ public sealed class ExceptionHandlingMiddleware
 
             var (statusCode, title) = MapException(ex);
 
-            _logger.LogWarning(ex, "Request failed with status {StatusCode} for {Path}", statusCode, context.Request.Path);
+            _logger.LogWarning(
+                ex,
+                "Request failed with status {StatusCode} for {Path} tenant {TenantId} user {UserId} session {SessionId}",
+                statusCode,
+                context.Request.Path,
+                currentUser.TenantId,
+                currentUser.UserId,
+                currentUser.RefreshTokenId);
 
             context.Response.Clear();
             context.Response.StatusCode = statusCode;

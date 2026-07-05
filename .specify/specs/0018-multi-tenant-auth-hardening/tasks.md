@@ -119,15 +119,16 @@
 **Purpose**: Final hardening and documentation updates that affect multiple stories.
 
 - [ ] T026 [P] Update Swagger descriptions and security notes in `Intuix.Authentication.Api/Swagger/AuthorizeOperationFilter.cs`, `Intuix.Authentication.Api/Controllers/AuthController.cs`, and `Intuix.Authentication.Api/Controllers/DevicesController.cs`
-- [ ] T027 [P] Update `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md` with final validation notes and auth flow steps
-- [ ] T028 [P] Run `dotnet test IntuixAuthentication.sln` and fix remaining regressions in `tests/Intuix.Authentication.ArchitectureTests/*`
+- [X] T027 [P] Update `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md` with final validation notes and auth flow steps
+- [X] T028 [P] Run `dotnet test IntuixAuthentication.sln` and fix remaining regressions in `tests/Intuix.Authentication.ArchitectureTests/*`
 - [ ] T029 [P] Verify the SQL baseline and migration artifacts stay aligned in `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql` and `Intuix.Authentication.Infrastructure/Migrations/*`
-- [ ] T030 [P] Add auth and session validators in `Intuix.Authentication.Application/Auth/Validators/` and `Intuix.Authentication.Application/Devices/Validators/`
-- [ ] T031 [P] Add structured security logging with tenant/session correlation in `Intuix.Authentication.Api/Program.cs`, `Intuix.Authentication.Api/Middleware/ExceptionHandlingMiddleware.cs`, `Intuix.Authentication.Api/Middleware/TenantMiddleware.cs`, and auth/device handlers
+- [X] T030 [P] Add auth and session validators in `Intuix.Authentication.Application/Auth/Validators/` and `Intuix.Authentication.Application/Devices/Validators/`
+- [X] T031 [P] Add structured security logging with tenant/session correlation in `Intuix.Authentication.Api/Program.cs`, `Intuix.Authentication.Api/Middleware/ExceptionHandlingMiddleware.cs`, `Intuix.Authentication.Api/Middleware/TenantMiddleware.cs`, and auth/device handlers
 - [ ] T032 [P] Align the shared API error contract with generic security failures in `.specify/specs/0018-multi-tenant-auth-hardening/contracts/api.md`
 - [ ] T033 [P] Add performance/load validation for sign-in, refresh, company-switch, and session-control flows in `tests/Intuix.Authentication.ArchitectureTests/PerformanceHardeningTests.cs`
-- [ ] T034 [P] Document the support/operations manual-unlock audit event schema and ownership in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md` and `.specify/specs/0018-multi-tenant-auth-hardening/research.md`
-- [ ] T035 [P] Validate rollback behavior by reverting `Intuix.Authentication.Api` and `Intuix.Authentication.Application` against the additive schema and document the recovery path in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md`
+- [X] T034 [P] Document the support/operations manual-unlock audit event schema and ownership in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md` and `.specify/specs/0018-multi-tenant-auth-hardening/research.md`
+- [X] T035 [P] Validate rollback behavior by reverting `Intuix.Authentication.Api` and `Intuix.Authentication.Application` against the additive schema and document the recovery path in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md`
+- [X] T036 [P] Add an HTTP integration test for `POST /auth/login` in `tests/Intuix.Authentication.ArchitectureTests/AuthEndpointIntegrationTests.cs` using the seeded `TNT-INTUIX` / `admin` / `Admin123!` credentials
 
 ---
 

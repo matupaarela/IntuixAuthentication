@@ -164,6 +164,7 @@ VALUES
 (NEWID(), @OrgQuipu,  'Servicios Quipu EIRL', '20600033333');
 
 DECLARE @CompQuipu1 UNIQUEIDENTIFIER = (SELECT id FROM auth_companies WHERE name = 'Comercial Quipu SAC');
+DECLARE @CompIntuix1 UNIQUEIDENTIFIER = (SELECT id FROM auth_companies WHERE name = 'Intuix Software SAC');
 
 -- =========================================
 -- ROLES
@@ -227,8 +228,11 @@ WHERE
 INSERT INTO auth_user_companies (user_id, company_id, is_default)
 SELECT u.id, c.id, 1
 FROM auth_users u
-JOIN auth_companies c ON c.id = @CompQuipu1
-WHERE u.username IN ('admin', 'vendedor', 'cajero');
+JOIN auth_companies c ON c.id = CASE
+    WHEN u.username IN ('admin', 'dev1') THEN @CompIntuix1
+    ELSE @CompQuipu1
+END
+WHERE u.username IN ('admin', 'dev1', 'vendedor', 'cajero');
 
 
 

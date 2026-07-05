@@ -1,8 +1,18 @@
 using Intuix.Authentication.Api.Middleware;
 using Intuix.Authentication.Application.Auth.Commands.Login;
+using Intuix.Authentication.Application.Auth.Commands.Logout;
+using Intuix.Authentication.Application.Auth.Commands.RefreshToken;
+using Intuix.Authentication.Application.Auth.Commands.SwitchCompany;
+using Intuix.Authentication.Application.Auth.Validators;
 using Intuix.Authentication.Application.Auth.Interfaces;
+using Intuix.Authentication.Application.Common.Behaviors;
 using Intuix.Authentication.Application.Common.Interfaces;
+using Intuix.Authentication.Application.Devices.Commands;
+using Intuix.Authentication.Application.Devices.Queries;
+using Intuix.Authentication.Application.Devices.Validators;
 using Intuix.Authentication.Domain.Interfaces;
+using FluentValidation;
+using MediatR;
 using Intuix.Authentication.Infrastructure.Persistence;
 using Intuix.Authentication.Infrastructure.Persistence.Repositories;
 using Intuix.Authentication.Infrastructure.Security;
@@ -53,6 +63,18 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginCommandHandler).Assembly));
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(SecurityLoggingBehavior<,>));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+builder.Services.AddScoped<IValidator<LoginCommand>, LoginCommandValidator>();
+builder.Services.AddScoped<IValidator<RefreshTokenCommand>, RefreshTokenCommandValidator>();
+builder.Services.AddScoped<IValidator<LogoutCommand>, LogoutCommandValidator>();
+builder.Services.AddScoped<IValidator<LogoutAllCommand>, LogoutAllCommandValidator>();
+builder.Services.AddScoped<IValidator<SwitchCompanyCommand>, SwitchCompanyCommandValidator>();
+builder.Services.AddScoped<IValidator<DeviceGetListQuery>, DeviceGetListQueryValidator>();
+builder.Services.AddScoped<IValidator<DeviceRevokeSessionCommand>, DeviceRevokeSessionCommandValidator>();
+builder.Services.AddScoped<IValidator<DeviceRevokeAllSessionsCommand>, DeviceRevokeAllSessionsCommandValidator>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -136,3 +158,5 @@ app.MapControllers();
 //}
 
 app.Run();
+
+public partial class Program { }

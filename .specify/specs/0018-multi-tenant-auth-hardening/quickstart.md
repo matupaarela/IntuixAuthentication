@@ -38,6 +38,11 @@ dotnet run --project Intuix.Authentication.Api
 - Company switching only succeeds for companies assigned to the current user.
 - Device listing shows active sessions and marks the current one.
 
+## Operational Notes
+
+- Manual unlocks are performed by support/operations tooling outside the auth API and must emit the structured audit event required by the spec.
+- If rollback is needed, revert the API/Application binaries first and keep the additive schema in place so the older binaries continue to run.
+
 ## Regression Checklist
 
 - Cross-tenant access is denied.

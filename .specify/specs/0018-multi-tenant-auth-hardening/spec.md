@@ -314,5 +314,5 @@ Response on success: confirmation that all other sessions were revoked.
 - Refresh-token revocation ends renewal ability, while the access token expires naturally.
 - Client applications understand refresh-token rotation and generic security failures, and stale refresh tokens may require re-authentication.
 - Users may belong to multiple companies inside one tenant, and one company is the default.
-- Multi-factor authentication, OAuth/SSO, API keys, and audit logging are handled as separate future features.
+- Multi-factor authentication, OAuth/SSO, and API keys are handled as separate future features; the separate audit-log product module remains out of scope, but this feature still emits its required security and manual-unlock operational logs.
 - Seed data and existing examples will be updated to stay coherent with the new rules.
