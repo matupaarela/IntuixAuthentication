@@ -5,7 +5,7 @@
 | Field | Decision |
 | --- | --- |
 | Runtime / Platform | .NET 8 ASP.NET Core Web API |
-| Dependencies | MediatR, EF Core 8, SQL Server, JWT Bearer auth, Swashbuckle, xUnit |
+| Dependencies | MediatR, EF Core 8, SQL Server, JWT Bearer auth, Swashbuckle, FluentValidation, xUnit |
 | Storage | SQL Server auth schema with `auth_*` tables |
 | Testing | xUnit architecture tests plus unit/integration coverage |
 | Target Platform | Server-side web service |

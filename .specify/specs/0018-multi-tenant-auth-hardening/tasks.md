@@ -11,7 +11,7 @@
 
 **Purpose**: Project setup and baseline infrastructure for the auth hardening work.
 
-- [ ] T001 [P] Create EF migration scaffolding and align the SQL baseline in `Intuix.Authentication.Infrastructure/Migrations/` and `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql`
+- [ ] T001 [P] Create EF migration scaffolding in `Intuix.Authentication.Infrastructure/Migrations/` and align the SQL baseline in `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql`
 - [ ] T002 Add centralized ProblemDetails middleware in `Intuix.Authentication.Api/Middleware/ExceptionHandlingMiddleware.cs` and register it in `Intuix.Authentication.Api/Program.cs`
 - [ ] T003 Move the tenant guard before authorization in `Intuix.Authentication.Api/Program.cs` and harden `Intuix.Authentication.Api/Middleware/TenantMiddleware.cs` to fail closed without raw exceptions
 
@@ -25,7 +25,7 @@
 
 - [ ] T004 Add `CancellationToken` support to auth repository interfaces and implementations in `Intuix.Authentication.Application/Auth/Interfaces/IUserRepository.cs`, `ITenantRepository.cs`, `IRefreshTokenRepository.cs`, and `Intuix.Authentication.Infrastructure/Persistence/Repositories/UserRepository.cs`, `TenantRepository.cs`, `RefreshTokenRepository.cs`
 - [ ] T005 Add `SaveChangesAsync(CancellationToken)` support for login state persistence in `Intuix.Authentication.Application/Auth/Interfaces/IUserRepository.cs` and `Intuix.Authentication.Infrastructure/Persistence/Repositories/UserRepository.cs`
-- [ ] T006 [P] Add `LastUsedAt` to refresh-token entity, configuration, and SQL baseline in `Intuix.Authentication.Domain/Entities/RefreshToken.cs`, `Intuix.Authentication.Infrastructure/Persistence/Configurations/RefreshTokenConfiguration.cs`, and `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql`
+- [ ] T006 [P] Backfill `LastUsedAt` for existing active refresh-token rows and keep `Intuix.Authentication.Infrastructure/Migrations/*` and `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql` aligned
 - [ ] T007 [P] Replace `ToLower()` lookups with index-friendly case-insensitive tenant/user comparisons in `Intuix.Authentication.Infrastructure/Persistence/Repositories/TenantRepository.cs` and `Intuix.Authentication.Infrastructure/Persistence/Repositories/UserRepository.cs`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
@@ -108,7 +108,7 @@
 - [ ] T022 [US4] Tighten user-company lookup rules for default-company and tenant ownership in `Intuix.Authentication.Infrastructure/Persistence/Repositories/UserRepository.cs`
 - [ ] T023 [US4] Enforce same-tenant, active-membership company switching in `Intuix.Authentication.Application/Auth/Commands/SwitchCompany/SwitchCompanyCommandHandler.cs`
 - [ ] T024 [US4] Populate current-session markers and `LastUsedAt` in `Intuix.Authentication.Application/Devices/Queries/DeviceGetListQueryHandler.cs`
-- [ ] T025 [US4] Keep session revocation tenant-safe in `Intuix.Authentication.Application/Devices/Commands/DeviceRevokeSessionCommandHandler.cs`, `Intuix.Authentication.Application/Devices/Commands/DeviceRevokeAllSessionsCommandHandler.cs`, and `Intuix.Authentication.Infrastructure/Persistence/Repositories/RefreshTokenRepository.cs`
+- [ ] T025 [US4] Keep session revocation tenant-safe in `Intuix.Authentication.Application/Auth/Commands/Logout/LogoutCommandHandler.cs`, `Intuix.Authentication.Application/Auth/Commands/Logout/LogoutAllCommandHandler.cs`, `Intuix.Authentication.Application/Devices/Commands/DeviceRevokeSessionCommandHandler.cs`, `Intuix.Authentication.Application/Devices/Commands/DeviceRevokeAllSessionsCommandHandler.cs`, and `Intuix.Authentication.Infrastructure/Persistence/Repositories/RefreshTokenRepository.cs`
 
 **Checkpoint**: All user stories should now be independently functional.
 

@@ -1,26 +1,22 @@
 # Implementation Plan: Multi-Tenant Auth Hardening
 
-**Branch**: `0018-multi-tenant-auth-hardening` | **Date**: 2026-07-02 | **Spec**: `.specify/specs/0018-multi-tenant-auth-hardening/spec.md`
+**Branch**: `0018-multi-tenant-auth-hardening` | **Date**: 2026-07-05 | **Spec**: `.specify/specs/0018-multi-tenant-auth-hardening/spec.md`
 
 **Input**: Feature specification from `.specify/specs/0018-multi-tenant-auth-hardening/spec.md`
 
 ## Summary
 
-Harden the auth surface by making lockout durable, revoking refresh families on reuse, enforcing tenant/company membership and permission policies, standardizing security failures, and preserving existing session/device controls.
+Harden the auth surface by making lockout durable, revoking refresh families on reuse, enforcing tenant/company membership and permission policies, standardizing generic security failures, and preserving current session/device controls without changing the tenant model.
 
 ## Technical Context
 
 **Language/Version**: C# / .NET 8
 
-**Primary Dependencies**: ASP.NET Core Web API, MediatR, Entity Framework Core 8, SQL Server, JWT Bearer auth, Swashbuckle, xUnit
+**Primary Dependencies**: ASP.NET Core Web API, MediatR, Entity Framework Core 8, SQL Server, JWT Bearer auth, Swashbuckle, xUnit, FluentValidation
 
-**Storage**: SQL Server auth schema (`auth_*` tables) with EF Core configurations and a checked-in SQL baseline
+**Storage**: SQL Server auth schema (`auth_*` tables) with EF Core configurations, forward-only migrations, and a checked-in SQL baseline
 
-**Testing**: xUnit architecture tests plus unit/integration tests for login, refresh reuse, company switching, device sessions, and security errors
-
-**Validation**: FluentValidation validators for auth and session inputs
-
-**Observability**: Structured security logging with tenant and session correlation, plus manual-unlock audit events
+**Testing**: xUnit architecture tests plus unit/integration coverage for login, refresh reuse, company switching, device sessions, and security errors
 
 **Target Platform**: Server-side web service (`Intuix.Authentication.Api`)
 
@@ -28,7 +24,7 @@ Harden the auth surface by making lockout durable, revoking refresh families on 
 
 **Performance Goals**: p95 sign-in/refresh <= 2s; p95 session operations <= 1s; 100% cross-tenant denial in regression
 
-**Constraints**: Generic security errors only, manual unlock only, no MFA/OAuth SSO/API keys/admin CRUD, preserve existing users, keep `Api -> Application -> Domain`
+**Constraints**: Generic security errors only, manual unlock only, no MFA/OAuth SSO/API keys/admin CRUD, preserve existing users, keep `Api -> Application -> Domain`, allow only one controlled query-filter bypass for refresh-token lookup before tenant context exists
 
 **Scale/Scope**: Intuix ecosystem trust boundary for tenant-scoped sign-in, token renewal, logout, company switching, and session/device controls
 
@@ -39,17 +35,8 @@ Harden the auth surface by making lockout durable, revoking refresh families on 
 - Feature scope, plan, and source layout honor `Api -> Application -> Domain`.
 - The feature lives under `.specify/specs/0018-multi-tenant-auth-hardening/` and follows the canonical naming scheme.
 - Security, tenant isolation, and sensitive-data handling are explicitly addressed.
-- Required tests, validators, migrations, logging, and documentation impacts are identified.
-- A controlled `IgnoreQueryFilters()` refresh-token lookup is documented as a deviation and must be revalidated against the owning user before issuance.
-
-## Migration and Rollout Strategy
-
-- `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql` is the checked-in baseline schema for fresh installs.
-- `Intuix.Authentication.Infrastructure/Migrations/` holds forward-only EF Core changes layered on top of that baseline.
-- The feature migration is additive: backfill `LastUsedAt`, align session indexes, and avoid destructive schema changes.
-- Rollout order is schema first, application second, then backfill/verification; success is not declared until the active-session data is populated.
-- Rollback is application-first: revert the API/application binaries if needed and keep the additive schema in place so older binaries continue to run safely.
-- The only tolerated query-filter bypass is refresh-token lookup before tenant context exists, and ownership must be revalidated before issuance or revocation.
+- Required tests, migrations, logging, and documentation impacts are identified.
+- The only controlled deviation is a documented `IgnoreQueryFilters()` lookup for refresh-token resolution before tenant context exists; it is constrained and revalidated in the plan.
 
 ## Project Structure
 
@@ -101,10 +88,12 @@ tests/
 └── Intuix.Authentication.ArchitectureTests/
 ```
 
-**Structure Decision**: Use the active `.specify/specs/0018-multi-tenant-auth-hardening/` directory as the feature workspace and keep source code in the repository root solution layout defined by the constitution.
+**Structure Decision**: Keep all feature work in `.specify/specs/0018-multi-tenant-auth-hardening/` and implement source changes in the existing repository layout defined by the constitution.
 
 ## Complexity Tracking
 
+Only a single controlled exception is required.
+
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| Refresh-token lookup bypasses query filters before tenant context exists | Refresh requests need token lookup before ownership can be validated | Requiring tenant context first would block valid renewals and reuse detection |
+| `IgnoreQueryFilters()` for refresh-token lookup before tenant context exists | Refresh requests need token lookup before ownership can be validated | Requiring tenant context first would block valid renewals and reuse detection |
