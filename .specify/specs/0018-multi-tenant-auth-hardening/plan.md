@@ -38,6 +38,15 @@ Harden the auth surface by making lockout durable, revoking refresh families on 
 - Required tests, migrations, logging, and documentation impacts are identified.
 - The only controlled deviation is a documented `IgnoreQueryFilters()` lookup for refresh-token resolution before tenant context exists; it is constrained and revalidated in the plan.
 
+## Migration and Rollback Strategy
+
+- `Intuix.Authentication.Infrastructure/Scripts/Intuix.Authentication.sql` remains the baseline for fresh installs.
+- `Intuix.Authentication.Infrastructure/Migrations/` contains additive EF Core changes layered on top of that baseline.
+- The feature migration is additive: backfill `LastUsedAt`, align session indexes, and avoid destructive schema changes.
+- Rollout order is schema first, application second, then backfill and verification; success is not declared until active-session data is populated.
+- Rollback is application-first: revert the API/Application binaries if needed and keep the additive schema in place so older binaries continue to run safely.
+- The only tolerated query-filter bypass is refresh-token lookup before tenant context exists, and ownership must be revalidated before issuance or revocation.
+
 ## Project Structure
 
 ### Documentation (this feature)

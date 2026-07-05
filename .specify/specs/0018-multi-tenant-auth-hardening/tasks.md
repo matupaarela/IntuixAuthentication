@@ -40,7 +40,7 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Add sign-in and lockout regression tests in `tests/Intuix.Authentication.ArchitectureTests/LoginHardeningTests.cs`
+- [ ] T008 [P] [US1] Add sign-in and lockout regression tests in `tests/Intuix.Authentication.ArchitectureTests/LoginHardeningTests.cs`, including the 5-attempt threshold
 - [ ] T009 [P] [US1] Add login contract and generic error assertions in `tests/Intuix.Authentication.ArchitectureTests/AuthLoginContractTests.cs`
 
 ### Implementation for User Story 1
@@ -126,6 +126,8 @@
 - [ ] T031 [P] Add structured security logging with tenant/session correlation in `Intuix.Authentication.Api/Program.cs`, `Intuix.Authentication.Api/Middleware/ExceptionHandlingMiddleware.cs`, `Intuix.Authentication.Api/Middleware/TenantMiddleware.cs`, and auth/device handlers
 - [ ] T032 [P] Align the shared API error contract with generic security failures in `.specify/specs/0018-multi-tenant-auth-hardening/contracts/api.md`
 - [ ] T033 [P] Add performance/load validation for sign-in, refresh, company-switch, and session-control flows in `tests/Intuix.Authentication.ArchitectureTests/PerformanceHardeningTests.cs`
+- [ ] T034 [P] Document the support/operations manual-unlock audit event schema and ownership in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md` and `.specify/specs/0018-multi-tenant-auth-hardening/research.md`
+- [ ] T035 [P] Validate rollback behavior by reverting `Intuix.Authentication.Api` and `Intuix.Authentication.Application` against the additive schema and document the recovery path in `.specify/specs/0018-multi-tenant-auth-hardening/quickstart.md`
 
 ---
 

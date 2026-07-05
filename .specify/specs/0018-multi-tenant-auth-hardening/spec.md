@@ -23,6 +23,10 @@ This feature hardens the existing authentication surface without expanding into 
 - Q: Is `lastUsedAt` required, exposed in `/api/devices`, and updated on each successful refresh-token exchange? → A: Yes.
 - Q: Should existing locked accounts be auto-unlocked during rollout? → A: No. Existing lock state is preserved and support/operations must release it manually.
 
+### Session 2026-07-05
+
+- Q: Where should manual-unlock audit events be emitted? → A: By the support/operations process outside the auth service, with a documented schema and no new public endpoint.
+
 ## Problem Statement
 
 The platform works on the happy path, but several failure paths still allow inconsistent security behavior or unclear user outcomes. In a shared multi-tenant environment, that creates risk of account lockouts not taking effect, stale sessions surviving reuse, users selecting companies they should not access, and protected endpoints relying on incomplete enforcement.
@@ -46,6 +50,7 @@ The service needs a complete, testable contract for safe authentication and tena
 - Adding API key authentication.
 - Building tenant, organization, company, user, role, or permission administration CRUD.
 - Introducing a new audit-log product module.
+- Building a public manual-unlock endpoint.
 - Redesigning the client applications or user interface.
 - Changing the tenant hierarchy or business model.
 
@@ -136,11 +141,11 @@ A user who belongs to more than one company can switch context, inspect active d
 - **FR-002**: The system must resolve the tenant before looking up the user.
 - **FR-003**: The system must reject unknown or inactive tenants.
 - **FR-004**: The system must reject inactive or locked users.
-- **FR-005**: The system must track consecutive failed sign-in attempts and lock the account after the configured threshold; locked accounts must remain locked until support/operations manually release them.
+- **FR-005**: The system must track consecutive failed sign-in attempts and lock the account after 5 consecutive failed attempts; locked accounts must remain locked until support/operations manually release them.
 - **FR-006**: The system must reset the failure counter after a successful sign-in.
 - **FR-007**: The system must update the user's last successful login time after a successful sign-in.
 - **FR-008**: The system must return a signed access token and a refresh token on successful sign-in.
-- **FR-009**: The access token must carry the user's identity, tenant, company, role, permission, and session context.
+- **FR-009**: The access token must carry the user's identity, tenant, company, role, permission, and session context via the JWT `sid` claim.
 - **FR-010**: The system must assign the user's default company at sign-in when one exists.
 - **FR-011**: The system must reject sign-in when no company assignment exists.
 - **FR-012**: The system must renew the session only with a valid, unrevoked refresh token.
@@ -156,11 +161,11 @@ A user who belongs to more than one company can switch context, inspect active d
 - **FR-022**: The system must return generic error messages for invalid tenants, invalid credentials, locked users, missing or malformed refresh tokens, expired sessions, unauthorized company selection, and reused tokens.
 - **FR-023**: The system must capture session metadata needed for user visibility and revocation decisions, including IP and user agent where available.
 - **FR-024**: The system must preserve token and session history needed to trace rotation and revocation chains.
-- **FR-025**: The system must record security-relevant outcomes with tenant and session context without exposing credentials, secrets, or token values.
+- **FR-025**: The system must record security-relevant outcomes with tenant and session context, including manual-unlock audit events emitted by support/operations tooling, without exposing credentials, secrets, or token values.
 - **FR-026**: The system must update the session `lastUsedAt` value on each successful refresh-token exchange, expose it in active-session listings, and backfill legacy active rows from `CreatedAt` during migration.
 - **FR-027**: The system must return the standard auth response envelope on successful company switch, including the selected company context, a new access token, and an empty refresh-token field.
 - **FR-028**: The system must validate authentication and session inputs before applying persistence or state changes.
-- **FR-029**: The system must produce structured logs for sign-in, refresh, company switch, and revocation flows with correlation to tenant, user, session, and request context.
+- **FR-029**: The system must produce structured logs for sign-in, refresh, company switch, revocation, and manual-unlock flows with correlation to tenant, user, session, and request context.
 - **FR-030**: The system must commit login, refresh, logout, logout-all, company-switch, and session-revocation state changes atomically; if persistence fails, the request must fail closed and no success response may be returned.
 
 ### Non-Functional Requirements
@@ -270,8 +275,8 @@ Response on success: confirmation that all other sessions were revoked.
 - **Role**: A tenant-scoped access grouping used to grant permissions.
 - **Permission**: A capability that can be granted to a role.
 - **User-Company membership**: The allowed-company relationship for a user, including the default company.
-- **Refresh session**: The active session family that can be renewed, rotated, and revoked.
-- **Device session**: The user-facing refresh-session view that includes device metadata, recency, and current-session status.
+- **Refresh session**: The active session family that can be renewed, rotated, and revoked; the JWT `sid` claim identifies the current session.
+- **Device session**: The user-facing refresh-session view that includes device metadata, recency, and current-session status, keyed by the `sid`-backed current session marker.
 
 ### Risks
 
@@ -286,6 +291,7 @@ Response on success: confirmation that all other sessions were revoked.
 - Existing tenant, company, role, permission, and membership data.
 - Signed access-token configuration and session-expiry settings.
 - An operational path to manually unlock users and maintain company memberships.
+- Support/operations tooling owns manual unlock actions and emits the corresponding audit events.
 - An operational logging sink that can retain structured security and manual-unlock events.
 - Client applications that can handle refresh rotation and generic security failures.
 - Regression coverage for tenant boundaries and session management.
@@ -294,7 +300,7 @@ Response on success: confirmation that all other sessions were revoked.
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% of lockout acceptance tests pass, including the configured failure threshold.
+- **SC-001**: 100% of lockout acceptance tests pass, including the 5-attempt failure threshold.
 - **SC-002**: 100% of refresh-token reuse acceptance tests revoke the full related session family.
 - **SC-003**: 0 successful cross-tenant access attempts occur in regression and UAT for login, refresh, switch-company, and device/session flows.
 - **SC-004**: 95% of sign-in, refresh, company-switch, and session-control actions complete within 2 seconds under expected load.
